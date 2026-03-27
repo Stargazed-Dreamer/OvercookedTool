@@ -6,9 +6,9 @@ namespace OvercookedTool.App;
 internal sealed class AboutContent
 {
     public string Version { get; init; } = "Dev";
-    public string QqGroup { get; init; } = "156986240";
-    public string GithubUrl { get; init; } = "https://github.com/StaryDreamer/OvercookedSaveTool";
-    public string BilibiliUrl { get; init; } = "https://www.bilibili.com/video/BV1Fq4y1Y7gu";
+    public string QqGroup { get; init; } = "null";
+    public string GithubUrl { get; init; } = "null";
+    public string BilibiliUrl { get; init; } = "null";
     public string Author { get; init; } = "星夜逐梦";
 }
 
@@ -38,9 +38,9 @@ internal static class AboutContentProvider
             return new AboutContent
             {
                 Version = string.IsNullOrWhiteSpace(raw.Version) ? "Dev" : raw.Version,
-                QqGroup = string.IsNullOrWhiteSpace(raw.QqGroup) ? "156986240" : raw.QqGroup,
-                GithubUrl = string.IsNullOrWhiteSpace(raw.GithubUrl) ? "https://github.com/StaryDreamer/OvercookedSaveTool" : raw.GithubUrl,
-                BilibiliUrl = string.IsNullOrWhiteSpace(raw.BilibiliUrl) ? "https://www.bilibili.com/video/BV1Fq4y1Y7gu" : raw.BilibiliUrl,
+                QqGroup = string.IsNullOrWhiteSpace(raw.QqGroup) ? "null" : raw.QqGroup,
+                GithubUrl = string.IsNullOrWhiteSpace(raw.GithubUrl) ? "null" : raw.GithubUrl,
+                BilibiliUrl = string.IsNullOrWhiteSpace(raw.BilibiliUrl) ? "null" : raw.BilibiliUrl,
                 Author = string.IsNullOrWhiteSpace(raw.Author) ? "星夜逐梦" : raw.Author,
             };
         }

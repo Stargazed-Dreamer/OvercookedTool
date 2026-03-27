@@ -1,5 +1,5 @@
 关于界面：
-AboutContentProvider.cs
+about_content.json
 
 收款码：
 图片文件直接改后缀：
