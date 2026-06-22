@@ -12,14 +12,15 @@ public sealed class KeyDetector
         string packagePath,
         SavePlatform platform,
         IReadOnlyList<SaveFileEntry> saves,
-        string? preferredKey)
+        string? preferredKey,
+        string? unityDeviceId = null)
     {
         if (platform is SavePlatform.AyceJson or SavePlatform.SwitchJson)
         {
             return (true, null, "JSON存档无需密钥");
         }
 
-        var candidates = BuildCandidates(packagePath, preferredKey);
+        var candidates = BuildCandidates(packagePath, preferredKey, unityDeviceId);
         var probe = saves.FirstOrDefault(x => !x.IsMeta) ?? saves.FirstOrDefault();
         if (probe is null)
         {
@@ -69,7 +70,7 @@ public sealed class KeyDetector
         return match.Success ? match.Groups["id"].Value : null;
     }
 
-    private static IReadOnlyList<(string Key, string Source)> BuildCandidates(string packagePath, string? preferredKey)
+    private static IReadOnlyList<(string Key, string Source)> BuildCandidates(string packagePath, string? preferredKey, string? unityDeviceId)
     {
         var list = new List<(string Key, string Source)>();
         void Add(string? key, string source)
@@ -88,6 +89,8 @@ public sealed class KeyDetector
         }
 
         Add(preferredKey, "手动输入密钥");
+
+        Add(unityDeviceId, "Unity设备标识");
 
         var folderName = Path.GetFileName(Path.GetFullPath(packagePath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
         Add(folderName, "目录名");

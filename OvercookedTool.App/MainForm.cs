@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿﻿using System.Diagnostics;
 using OvercookedTool.Core.Logging;
 using OvercookedTool.Core.Models;
 using OvercookedTool.Core.Services;
@@ -66,6 +66,8 @@ internal sealed class MainForm : Form
         DragEnter += MainForm_DragEnter;
         DragDrop += MainForm_DragDrop;
         AppLogger.LogEmitted += OnLogEmitted;
+
+        Load += (_, _) => EnsureUnityDeviceId();
     }
 
     protected override void OnFormClosed(FormClosedEventArgs e)
@@ -99,6 +101,7 @@ internal sealed class MainForm : Form
             form.ShowDialog(this);
         });
         about.DropDownItems.Add("打开日志目录", null, (_, _) => OpenLogDirectory());
+        about.DropDownItems.Add("本机 Unity 设备标识", null, (_, _) => ShowUnityDeviceIdDialog());
         about.DropDownItems.Add("打赏", null, (_, _) =>
         {
             using var donate = new DonateForm();
@@ -114,6 +117,27 @@ internal sealed class MainForm : Form
         var logDir = Path.Combine(AppContext.BaseDirectory, "logs");
         Directory.CreateDirectory(logDir);
         Process.Start("explorer.exe", logDir);
+    }
+
+    private void EnsureUnityDeviceId()
+    {
+        if (!string.IsNullOrWhiteSpace(_settings.UnityDeviceId))
+        {
+            return;
+        }
+
+        ShowUnityDeviceIdDialog();
+    }
+
+    private void ShowUnityDeviceIdDialog()
+    {
+        using var dialog = new UnityDeviceIdDialog(_settings.UnityDeviceId);
+        if (dialog.ShowDialog(this) == DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.EnteredDeviceId))
+        {
+            _settings.UnityDeviceId = dialog.EnteredDeviceId;
+            AppSettingsStore.Save(_settings);
+            _statusLabel.Text = "Unity 设备标识已保存";
+        }
     }
 
     private void ShowSettings()
@@ -198,7 +222,7 @@ internal sealed class MainForm : Form
     {
         try
         {
-            var context = _saveService.LoadPackage(packagePath, string.IsNullOrWhiteSpace(preferredKey) ? null : preferredKey);
+            var context = _saveService.LoadPackage(packagePath, string.IsNullOrWhiteSpace(preferredKey) ? null : preferredKey, unityDeviceId: _settings.UnityDeviceId);
             if (_tabsByPath.TryGetValue(packagePath, out var existing))
             {
                 if (existing.Controls.OfType<PackageTabView>().FirstOrDefault() is { } existingView)

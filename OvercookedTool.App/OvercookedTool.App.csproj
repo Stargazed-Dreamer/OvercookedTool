@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\OvercookedTool.Core\OvercookedTool.Core.csproj" />
@@ -20,6 +20,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <EmbeddedResource Include="about_content.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="UnityHarness\**\*" LinkBase="UnityHarness\" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

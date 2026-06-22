@@ -1,6 +1,6 @@
 @echo off
-REM ºúÄÖ³ø·¿´æµµ¹¤¾ß - ·Ö·¢°ü´´½¨½Å±¾
-REM Õâ¸ö½Å±¾»á´´½¨Ò»¸ö¸É¾»µÄ¡¢¿ÉÒÔ°²È«·Ö·¢µÄ³ÌÐò°ü
+REM ï¿½ï¿½ï¿½Ö³ï¿½ï¿½ï¿½ï¿½æµµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ - ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½Å±ï¿½
+REM ï¿½Ë½Å±ï¿½ï¿½á´´ï¿½ï¿½Ò»ï¿½ï¿½ï¿½É¾ï¿½ï¿½Ä¡ï¿½ï¿½É°ï¿½È«ï¿½Ö·ï¿½ï¿½Ä³ï¿½ï¿½ï¿½
 setlocal
 
 cd /d "%~dp0"
@@ -8,73 +8,81 @@ cd /d "%~dp0"
 set RELEASE_DIR=OvercookedTool.App\bin\Release\net9.0-windows
 set PACKAGE_DIR=OvercookedSaveTool-Package
 
-echo ºúÄÖ³ø·¿´æµµ¹¤¾ß - ·Ö·¢°ü´´½¨
+echo ï¿½ï¿½ï¿½Ö³ï¿½ï¿½ï¿½ï¿½æµµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ - ï¿½Ö·ï¿½ï¿½ï¿½ï¿½
 echo =================================
 
-REM ¼ì²éRelease°æ±¾ÊÇ·ñ´æÔÚ
+REM ï¿½ï¿½ï¿½Releaseï¿½æ±¾ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
 if not exist "%RELEASE_DIR%\OvercookedTool.App.exe" (
-    echo ´íÎó: Î´ÕÒµ½Release°æ±¾!
-    echo ÇëÏÈÔËÐÐ build-release.bat ±àÒëRelease°æ±¾
+    echo ï¿½ï¿½ï¿½ï¿½: Î´ï¿½Òµï¿½Releaseï¿½æ±¾!
+    echo ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ build-release.bat ï¿½ï¿½ï¿½ï¿½Releaseï¿½æ±¾
     pause
     exit /b 1
 )
 
-echo ²½Öè1: ´´½¨·Ö·¢°üÄ¿Â¼...
+echo ï¿½ï¿½ï¿½ï¿½1: ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½Ä¿ï¿½ï¿½Ä¿Â¼...
 if exist "%PACKAGE_DIR%" (
-    echo É¾³ý¾ÉµÄ°üÄ¿Â¼...
+    echo É¾ï¿½ï¿½ï¿½ÉµÄ°ï¿½Ä¿Â¼...
     rmdir /s /q "%PACKAGE_DIR%"
 )
 mkdir "%PACKAGE_DIR%"
 
 if errorlevel 1 (
-    echo ´´½¨Ä¿Â¼Ê§°Ü!
+    echo ï¿½ï¿½ï¿½ï¿½Ä¿Â¼Ê§ï¿½ï¿½!
     pause
     exit /b 1
 )
 
 echo.
-echo ²½Öè2: ¸´ÖÆ±ØÐèµÄÎÄ¼þ...
+echo ï¿½ï¿½ï¿½ï¿½2: ï¿½ï¿½ï¿½Æºï¿½ï¿½ï¿½ï¿½Ä¼ï¿½...
 
-REM ¸´ÖÆÖ÷Òª³ÌÐòÎÄ¼þ
+REM ï¿½ï¿½ï¿½Æ±ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
 copy "%RELEASE_DIR%\OvercookedTool.App.exe" "%PACKAGE_DIR%\" >nul
 copy "%RELEASE_DIR%\OvercookedTool.App.dll" "%PACKAGE_DIR%\" >nul
 copy "%RELEASE_DIR%\OvercookedTool.Core.dll" "%PACKAGE_DIR%\" >nul
 copy "%RELEASE_DIR%\libcoffee.dll" "%PACKAGE_DIR%\" >nul
 
-REM ¸´ÖÆÅäÖÃÎÄ¼þ
+REM ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
 copy "%RELEASE_DIR%\save_display_config.json" "%PACKAGE_DIR%\" >nul
 
-REM ¸´ÖÆÔËÐÐÊ±ÅäÖÃÎÄ¼þ
+REM ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
 copy "%RELEASE_DIR%\OvercookedTool.App.runtimeconfig.json" "%PACKAGE_DIR%\" >nul
 copy "%RELEASE_DIR%\OvercookedTool.App.deps.json" "%PACKAGE_DIR%\" >nul
 
+REM ï¿½ï¿½ï¿½ï¿½ Unity ï¿½è±¸ï¿½ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½
+echo ï¿½ï¿½ï¿½ï¿½ Unity ï¿½è±¸ï¿½ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½...
+xcopy "%RELEASE_DIR%\UnityHarness" "%PACKAGE_DIR%\UnityHarness\" /E /I /Y >nul
+
 if errorlevel 1 (
-    echo ÎÄ¼þ¸´ÖÆÊ§°Ü!
+    echo ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½!
     pause
     exit /b 1
 )
 
 echo.
-echo ²½Öè3: ÑéÖ¤ÎÄ¼þ...
+echo ï¿½ï¿½ï¿½ï¿½3: ï¿½ï¿½Ö¤ï¿½Ä¼ï¿½...
 if not exist "%PACKAGE_DIR%\OvercookedTool.App.exe" (
-    echo ´íÎó: Ö÷³ÌÐòÎÄ¼þÈ±Ê§!
+    echo ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½È±Ê§!
     pause
     exit /b 1
 )
 
 if not exist "%PACKAGE_DIR%\OvercookedTool.Core.dll" (
-    echo ´íÎó: ºËÐÄ¿âÎÄ¼þÈ±Ê§!
+    echo ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Ä¼ï¿½È±Ê§!
     pause
     exit /b 1
 )
 
+if not exist "%PACKAGE_DIR%\UnityHarness\_UnityDeviceUniqueIdentifierHarness.exe" (
+    echo ï¿½ï¿½ï¿½ï¿½: Unity ï¿½è±¸ï¿½ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½È±Ê§!
+)
+
 echo.
 echo =================================
-echo ·Ö·¢°ü´´½¨³É¹¦!
+echo ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½!
 echo.
-echo °üÄ¿Â¼: %cd%\%PACKAGE_DIR%\
+echo ï¿½ï¿½Ä¿Â¼: %cd%\%PACKAGE_DIR%\
 echo.
-echo °üº¬µÄÎÄ¼þ:
+echo ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½:
 for %%f in ("%PACKAGE_DIR%\*.*") do (
     echo - %%~nxf
 )

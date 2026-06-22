@@ -1,26 +1,29 @@
 @echo off
-REM 胡闹厨房存档工具 - Release版本编译脚本
-REM 这个脚本会编译Release版本，适合分发给用户
+REM 锟斤拷锟街筹拷锟斤拷锟芥档锟斤拷锟斤拷锟斤拷 - Release锟芥本锟斤拷锟斤拷锟脚憋拷
+REM 锟剿脚憋拷锟斤拷锟斤拷Release锟芥本锟斤拷锟绞合分凤拷锟斤拷锟矫伙拷
 setlocal
 
 cd /d "%~dp0"
-echo 正在编译胡闹厨房存档工具Release版本...
+echo 锟斤拷锟节癸拷锟斤拷锟斤拷锟街筹拷锟斤拷锟芥档锟斤拷锟斤拷锟斤拷Release锟芥本...
 echo.
 
-echo 步骤1: 清理之前的编译结果...
+echo 锟斤拷锟斤拷1: 锟斤拷锟斤拷之前锟侥癸拷锟斤拷...
 dotnet clean OvercookedTool.sln -c Release -v minimal
 if errorlevel 1 (
-    echo 清理失败!
+    echo 锟斤拷锟斤拷失锟斤拷!
     pause
     exit /b 1
 )
 
 echo.
-echo 步骤2: 编译Release版本...
+echo 锟斤拷锟斤拷2: 锟斤拷锟斤拷Release锟芥本...
 dotnet build OvercookedTool.sln -c Release -v minimal
 if errorlevel 1 (
-    echo 编译失败!
+    echo 锟斤拷锟斤拷失锟斤拷!
     pause
     exit /b 1
 )
+
+echo.
+echo 锟斤拷锟斤拷锟缴癸拷!
 pause

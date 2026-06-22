@@ -14,7 +14,7 @@ public sealed class SavePackageService
     private readonly KeyDetector _keyDetector = new();
     public int BackupHistoryPerSave { get; set; } = DefaultBackupHistoryPerSave;
 
-    public SavePackageContext LoadPackage(string packagePath, string? preferredKey = null, bool allowEmpty = false)
+    public SavePackageContext LoadPackage(string packagePath, string? preferredKey = null, bool allowEmpty = false, string? unityDeviceId = null)
     {
         if (!Directory.Exists(packagePath))
         {
@@ -44,7 +44,7 @@ public sealed class SavePackageService
         }
 
         var platform = DetectPlatform(entries);
-        var keyResult = _keyDetector.DetectKey(packagePath, platform, entries, preferredKey);
+        var keyResult = _keyDetector.DetectKey(packagePath, platform, entries, preferredKey, unityDeviceId);
         var version = DetectPackageVersion(platform, entries, keyResult.Key);
         var friendCode = _keyDetector.TryExtractFriendCode(packagePath);
         var enriched = PopulateStarCounts(entries, platform, keyResult.Key);

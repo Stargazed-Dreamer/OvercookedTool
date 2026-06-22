@@ -7,4 +7,5 @@ internal sealed class AppSettings
     public int MaxRecentCount { get; set; } = 20;
     public bool EnableLogging { get; set; } = true;
     public int MaxBackupPerSave { get; set; } = 10;
+    public string? UnityDeviceId { get; set; }
 }
