@@ -5,10 +5,15 @@ using OvercookedTool.Core.Services;
 
 namespace OvercookedTool.App;
 
+/// <summary>
+/// 胡闹厨房存档管理器的主窗体类，负责管理UI界面、存档包的导入导出、编辑、同步等功能。
+/// </summary>
 internal sealed class MainForm : Form
 {
     private readonly SavePackageService _saveService = new();
+    // 以路径为键存储已打开的标签页
     private readonly Dictionary<string, TabPage> _tabsByPath = new(StringComparer.OrdinalIgnoreCase);
+    // 以包路径为键，存储该包下所有存档的待同步编辑（JSON文本）
     private readonly Dictionary<string, Dictionary<string, PendingSaveEdit>> _pendingEditsByPackage = new(StringComparer.OrdinalIgnoreCase);
     private readonly AppSettings _settings;
 
@@ -23,6 +28,7 @@ internal sealed class MainForm : Form
     public MainForm(AppSettings? startupSettings = null)
     {
         _settings = startupSettings ?? AppSettingsStore.Load();
+        // 设置备份历史记录的上限，并限制在1到50之间
         _saveService.BackupHistoryPerSave = Math.Clamp(_settings.MaxBackupPerSave, 1, 50);
 
         SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
@@ -48,6 +54,7 @@ internal sealed class MainForm : Form
             Padding = new Point(18, 6),
         };
         UiPerformance.EnableDoubleBuffer(_tabControl);
+        // 为标签页控件绑定事件
         _tabControl.DrawItem += TabControl_DrawItem;
         _tabControl.MouseDown += TabControl_MouseDown;
         _tabControl.SelectedIndexChanged += TabControl_SelectedIndexChanged;
@@ -121,6 +128,7 @@ internal sealed class MainForm : Form
 
     private void EnsureUnityDeviceId()
     {
+        // 如果设备ID为空，则弹出对话框引导用户设置
         if (!string.IsNullOrWhiteSpace(_settings.UnityDeviceId))
         {
             return;
@@ -148,6 +156,7 @@ internal sealed class MainForm : Form
             return;
         }
 
+        // 应用用户修改的设置
         _settings.EnableAutoDetectOnImport = dialog.EnableAutoDetectOnImport;
         _settings.MaxRecentCount = dialog.MaxRecentCount;
         _settings.EnableLogging = dialog.EnableLogging;
@@ -155,6 +164,7 @@ internal sealed class MainForm : Form
         _saveService.BackupHistoryPerSave = _settings.MaxBackupPerSave;
         AppLogger.SetEnabled(_settings.EnableLogging);
 
+        // 裁剪最近打开路径列表，使其不超过最大数量
         while (_settings.RecentPackagePaths.Count > _settings.MaxRecentCount)
         {
             _settings.RecentPackagePaths.RemoveAt(_settings.RecentPackagePaths.Count - 1);
@@ -196,12 +206,14 @@ internal sealed class MainForm : Form
 
     private void OpenByPotentialRoot(string inputPath)
     {
+        // 尝试将输入路径解析为存档包路径
         if (_saveService.TryResolvePackagePath(inputPath, out var resolved, out var candidates))
         {
             OpenOrReloadPackage(resolved, preferredKey: null);
             return;
         }
 
+        // 如果有多个候选路径，则让用户选择
         if (candidates.Count > 1)
         {
             using var choose = new SelectPackageDialog(
@@ -223,6 +235,7 @@ internal sealed class MainForm : Form
         try
         {
             var context = _saveService.LoadPackage(packagePath, string.IsNullOrWhiteSpace(preferredKey) ? null : preferredKey, unityDeviceId: _settings.UnityDeviceId);
+            // 如果该路径对应的标签页已存在，则刷新它
             if (_tabsByPath.TryGetValue(packagePath, out var existing))
             {
                 if (existing.Controls.OfType<PackageTabView>().FirstOrDefault() is { } existingView)
@@ -238,9 +251,11 @@ internal sealed class MainForm : Form
                 return;
             }
 
+            // 创建新的标签页和视图
             var page = new TabPage(context.DisplayName);
             var view = new PackageTabView();
             view.Bind(context);
+            // 绑定视图的各种请求事件
             view.ApplyKeyRequested += (_, key) => OpenOrReloadPackage(packagePath, key);
             view.AddSaveRequested += (_, _) => HandleAddSave(view);
             view.EditMetaRequested += (_, _) => HandleEditMeta(view);
@@ -256,6 +271,7 @@ internal sealed class MainForm : Form
             page.Controls.Add(view);
 
             _tabsByPath[packagePath] = page;
+            // 将新标签页插入到"加号"标签页之前
             _tabControl.TabPages.Insert(Math.Max(_tabControl.TabPages.Count - 1, 0), page);
             _tabControl.SelectedTab = page;
             _lastNormalTabIndex = _tabControl.SelectedIndex;
@@ -277,6 +293,7 @@ internal sealed class MainForm : Form
             return;
         }
 
+        // 分析同步问题（如冲突、待备份等）
         var issues = _saveService.AnalyzeSyncIssues(view.Context);
         view.SetDiagnostics(issues);
         ApplyPendingStateToView(view);
@@ -297,6 +314,7 @@ internal sealed class MainForm : Form
             return;
         }
 
+        // 清理掉已经不存在的存档对应的待编辑项
         var existingByPath = view.Context.Saves.ToDictionary(x => NormalizePath(x.FullPath), x => x, StringComparer.OrdinalIgnoreCase);
         foreach (var stale in map.Keys.Where(k => !existingByPath.ContainsKey(k)).ToList())
         {
@@ -310,6 +328,7 @@ internal sealed class MainForm : Form
             return;
         }
 
+        // 收集所有有待编辑项的存档，并通知视图
         var pendingSaves = map.Keys
             .Where(existingByPath.ContainsKey)
             .Select(k => existingByPath[k])
@@ -324,6 +343,7 @@ internal sealed class MainForm : Form
             return;
         }
 
+        // 获取建议的新存档槽位和DLC信息
         var (slot, dlc) = view.GetSuggestedNewSaveInfo();
         using var dialog = new AddSaveDialog(slot, dlc);
         if (dialog.ShowDialog(this) != DialogResult.OK)
@@ -331,6 +351,7 @@ internal sealed class MainForm : Form
             return;
         }
 
+        // 选择一个模板存档（排除Meta存档）
         var template = view.GetSelectedSaves().FirstOrDefault(x => !x.IsMeta)
             ?? view.Context.Saves.FirstOrDefault(x => !x.IsMeta && (dialog.DlcId == null || x.DlcId == dialog.DlcId));
         var result = _saveService.CreateSaveWithPreset(view.Context, dialog.Slot, dialog.DlcId, dialog.Preset, template);
@@ -357,6 +378,7 @@ internal sealed class MainForm : Form
 
         try
         {
+            // 优先读取待编辑的JSON，否则读取原始文件
             var json = TryGetPendingJson(view.Context.PackagePath, meta.FullPath, out var pendingJson)
                 ? pendingJson
                 : _saveService.ReadSaveAsJson(view.Context, meta);
@@ -367,6 +389,7 @@ internal sealed class MainForm : Form
                 return;
             }
 
+            // 将编辑后的JSON暂存
             PutPendingEdit(view.Context.PackagePath, meta, editor.JsonText);
             ApplyPendingStateToView(view);
             RefreshDiagnostics(view);
@@ -387,6 +410,7 @@ internal sealed class MainForm : Form
             return;
         }
 
+        // 检查选中的存档是否有未同步的编辑，并给出警告
         var pendingCount = request.Saves.Count(s => HasPendingEdit(view.Context.PackagePath, s.FullPath));
         if (pendingCount > 0)
         {
@@ -401,6 +425,7 @@ internal sealed class MainForm : Form
             }
         }
 
+        // 获取其他已打开的存档包作为目标候选
         var targetCandidates = _tabsByPath.Keys
             .Where(x => !string.Equals(x, view.Context.PackagePath, StringComparison.OrdinalIgnoreCase))
             .OrderBy(x => x)
@@ -424,6 +449,7 @@ internal sealed class MainForm : Form
         var fail = 0;
         var ok = 0;
         var errors = new List<string>();
+        // 逐个存档执行转移操作
         foreach (var save in request.Saves)
         {
             var result = _saveService.TransferSave(view.Context, save, target, request.Move);
@@ -447,6 +473,7 @@ internal sealed class MainForm : Form
             : $"完成：成功 {ok} 项，失败 {fail} 项。\n{string.Join("\n", errors.Take(5))}";
         MessageBox.Show(summary, "执行结果", MessageBoxButtons.OK, fail == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
 
+        // 刷新源包和目标包的视图
         OpenOrReloadPackage(view.Context.PackagePath, view.ManualKey);
         OpenOrReloadPackage(target, null);
     }
@@ -470,6 +497,7 @@ internal sealed class MainForm : Form
         }
 
         var result = _saveService.DeleteSaves(view.Context, saves);
+        // 删除成功后，清除对应的待编辑记录
         foreach (var save in saves)
         {
             RemovePendingEdit(view.Context.PackagePath, save.FullPath);
@@ -511,6 +539,7 @@ internal sealed class MainForm : Form
 
             try
             {
+                // 将暂存的JSON写回到源文件
                 _saveService.WriteJsonToSave(view.Context, save, pending.JsonText, "edit-sync");
                 map.Remove(key);
                 ok++;
@@ -522,6 +551,7 @@ internal sealed class MainForm : Form
             }
         }
 
+        // 如果该包下所有待编辑项都已清除，则移除该包的记录
         if (map.Count == 0)
         {
             _pendingEditsByPackage.Remove(packageKey);
@@ -579,6 +609,7 @@ internal sealed class MainForm : Form
             return;
         }
 
+        // 获取该存档的备份历史记录
         var history = _saveService.GetBackupHistory(save);
         using var timeline = new SaveTimelineForm(save.FileName, history);
         if (timeline.ShowDialog(this) != DialogResult.OK || timeline.SelectedBackup is null)
@@ -637,6 +668,7 @@ internal sealed class MainForm : Form
         }
 
         var saves = issues.Select(x => x.Save).DistinctBy(x => x.FullPath).ToList();
+        // 执行备份操作
         var result = _saveService.BackupSaves(saves);
         MessageBox.Show(result.Message, result.Success ? "处理完成" : "处理结果", MessageBoxButtons.OK, result.Success ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
         OpenOrReloadPackage(view.Context.PackagePath, view.ManualKey);
@@ -656,6 +688,7 @@ internal sealed class MainForm : Form
             return;
         }
 
+        // 移动成功后，更新待编辑记录中的路径
         if (!string.IsNullOrWhiteSpace(result.TargetPath))
         {
             MovePendingEditPath(view.Context.PackagePath, request.Save.FullPath, result.TargetPath!);
@@ -666,6 +699,7 @@ internal sealed class MainForm : Form
 
     private void RememberPackage(string packagePath)
     {
+        // 将包路径加入最近打开列表，并保存设置
         AppSettingsStore.PushRecent(_settings, packagePath);
         AppSettingsStore.Save(_settings);
     }
@@ -683,6 +717,7 @@ internal sealed class MainForm : Form
 
     private void CloseTab(TabPage page)
     {
+        // 从字典中移除对应的包路径
         if (page.Controls.OfType<PackageTabView>().FirstOrDefault() is { Context: not null } view)
         {
             _tabsByPath.Remove(view.Context.PackagePath);
@@ -695,6 +730,7 @@ internal sealed class MainForm : Form
 
     private void TabControl_SelectedIndexChanged(object? sender, EventArgs e)
     {
+        // 防止递归触发
         if (_handlingPlusSelection)
         {
             return;
@@ -705,12 +741,14 @@ internal sealed class MainForm : Form
             return;
         }
 
+        // 如果用户点击了“+”标签页，则触发导入对话框
         if (ReferenceEquals(_tabControl.SelectedTab, _plusTab))
         {
             _handlingPlusSelection = true;
             try
             {
                 OpenPackageByDialog();
+                // 如果打开了新标签页，则切换回上一个普通标签页，避免停留在“+”页
                 if (_tabControl.TabPages.Count > 1)
                 {
                     var index = Math.Min(_lastNormalTabIndex, _tabControl.TabPages.Count - 2);
@@ -741,6 +779,7 @@ internal sealed class MainForm : Form
             : null;
 
         var rect = _tabControl.GetTabRect(e.Index);
+        // 根据是否选中，绘制不同的背景色
         using var bg = new SolidBrush(page == selected ? Color.White : Color.FromArgb(235, 241, 251));
         e.Graphics.FillRectangle(bg, rect);
 
@@ -748,6 +787,7 @@ internal sealed class MainForm : Form
         var textRect = new Rectangle(rect.X + 8, rect.Y + 4, rect.Width - 20, rect.Height - 8);
         TextRenderer.DrawText(e.Graphics, text, Font, textRect, Color.Black, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
 
+        // 对于普通标签页（非“+”页），绘制关闭按钮
         if (!ReferenceEquals(page, _plusTab))
         {
             var closeRect = GetTabCloseRect(rect);
@@ -759,6 +799,7 @@ internal sealed class MainForm : Form
 
     private void TabControl_MouseDown(object? sender, MouseEventArgs e)
     {
+        // 检测鼠标点击是否落在某个标签页的关闭按钮上
         for (var i = 0; i < _tabControl.TabPages.Count; i++)
         {
             var page = _tabControl.TabPages[i];
@@ -777,11 +818,13 @@ internal sealed class MainForm : Form
         }
     }
 
+    // 计算标签页关闭按钮的矩形区域
     private static Rectangle GetTabCloseRect(Rectangle tabRect)
     {
         return new Rectangle(tabRect.Right - 18, tabRect.Top + 4, 14, tabRect.Height - 8);
     }
 
+    // 处理日志事件，更新状态栏（需要节流以避免UI卡顿）
     private void OnLogEmitted(string line)
     {
         if (IsDisposed)
@@ -795,12 +838,14 @@ internal sealed class MainForm : Form
             return;
         }
 
+        // 如果窗口正在移动，则不更新状态栏以减少闪烁
         if (_isMovingWindow)
         {
             return;
         }
 
         var now = DateTime.UtcNow;
+        // 节流：120毫秒内只更新一次
         if ((now - _lastStatusUpdate).TotalMilliseconds < 120)
         {
             return;
@@ -808,9 +853,11 @@ internal sealed class MainForm : Form
 
         _lastStatusUpdate = now;
         const int maxLen = 180;
+        // 截断过长的日志消息
         _statusLabel.Text = line.Length <= maxLen ? line : line[..maxLen] + "...";
     }
 
+    // 重写WndProc以捕获窗口移动消息，用于在移动窗口时暂停状态栏更新
     protected override void WndProc(ref Message m)
     {
         const int WM_ENTERSIZEMOVE = 0x0231;
@@ -847,6 +894,7 @@ internal sealed class MainForm : Form
         {
             try
             {
+                // 如果是文件夹则直接使用，如果是文件则取其所在目录
                 var packagePath = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
                 if (!string.IsNullOrWhiteSpace(packagePath))
                 {
@@ -879,6 +927,7 @@ internal sealed class MainForm : Form
         return false;
     }
 
+    // 存储待编辑的JSON文本
     private void PutPendingEdit(string packagePath, SaveFileEntry save, string jsonText)
     {
         var packageKey = NormalizePath(packagePath);
@@ -897,6 +946,7 @@ internal sealed class MainForm : Form
         };
     }
 
+    // 移除待编辑记录
     private void RemovePendingEdit(string packagePath, string savePath)
     {
         var packageKey = NormalizePath(packagePath);
@@ -912,6 +962,7 @@ internal sealed class MainForm : Form
         }
     }
 
+    // 当存档文件被移动时，同步更新待编辑记录的路径
     private void MovePendingEditPath(string packagePath, string oldPath, string newPath)
     {
         var packageKey = NormalizePath(packagePath);
@@ -928,10 +979,12 @@ internal sealed class MainForm : Form
         }
 
         map.Remove(oldKey);
+        // 克隆SaveFileEntry对象并更新路径
         var renamed = CloneWithPath(pending.Save, newPath);
         map[newKey] = pending with { Save = renamed };
     }
 
+    // 创建SaveFileEntry的浅拷贝，并替换路径
     private static SaveFileEntry CloneWithPath(SaveFileEntry source, string newPath)
     {
         return new SaveFileEntry
@@ -948,11 +1001,13 @@ internal sealed class MainForm : Form
         };
     }
 
+    // 标准化路径，使其全小写并去除尾部的斜杠
     private static string NormalizePath(string path)
     {
         return Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
     }
 
+    // 记录待同步编辑的元数据
     private sealed record PendingSaveEdit
     {
         public required SaveFileEntry Save { get; init; }

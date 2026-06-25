@@ -1,5 +1,8 @@
-namespace OvercookedTool.Core.Models;
+﻿namespace OvercookedTool.Core.Models;
 
+/// <summary>
+/// 用于保存包的上下文信息，包含包的路径、显示名称、平台、版本等属性。
+/// </summary>
 public sealed class SavePackageContext
 {
     public required string PackagePath { get; init; }
