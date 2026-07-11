@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+﻿﻿using System.Text.RegularExpressions;
 using OvercookedTool.Core.Crypto;
 using OvercookedTool.Core.Models;
 
