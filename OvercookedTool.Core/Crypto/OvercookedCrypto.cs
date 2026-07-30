@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -155,7 +155,7 @@ public static class OvercookedCrypto
     /// <param name="password">密码</param>
     /// <param name="start">起始位置</param>
     /// <param name="keySize">密钥大小（位）</param>
-    /// <returns>解密后的字节数组，失败返回null</returns>
+    /// <returns>解密后的字节数组（已去除 PKCS7 填充），失败返回null</returns>
     private static byte[]? Deobfuscate(byte[] obfuscatedText, int size, string password, int start = 0, int keySize = 256)
     {
         // 验证输入数据长度是否足够
@@ -181,20 +181,14 @@ public static class OvercookedCrypto
         // 创建RijndaelManaged解密器（CBC模式）
         using var rijndael = new RijndaelManaged { Mode = CipherMode.CBC };
 #pragma warning restore SYSLIB0022
-        var output = new byte[cipher.Length];
         try
         {
             // 创建解密转换器
             using var transform = rijndael.CreateDecryptor(key, iv);
-            using var memoryStream = new MemoryStream(cipher);
-            using var cryptoStream = new CryptoStream(memoryStream, transform, CryptoStreamMode.Read);
-
-            // 读取解密后的数据
-            for (int read = 0, total = 0; (read = cryptoStream.Read(output, total, output.Length - total)) != 0; total += read)
-            {
-            }
-
-            return output;
+            // TransformFinalBlock 会自动去除 PKCS7 填充，返回的字节数组长度即为真实明文长度
+            // （旧实现用 CryptoStream.Read 写入 output = new byte[cipher.Length]，
+            //  导致缓冲区比真实明文长 1-16 字节，尾部为 0x00，需要 TrimEnd('\0') 才能得到正确内容）
+            return transform.TransformFinalBlock(cipher, 0, cipher.Length);
         }
         catch
         {
