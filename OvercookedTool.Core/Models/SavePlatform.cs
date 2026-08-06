@@ -1,4 +1,4 @@
-﻿namespace OvercookedTool.Core.Models;
+namespace OvercookedTool.Core.Models;
 
 /// <summary>
 /// 枚举类型，用于标识不同的保存平台。

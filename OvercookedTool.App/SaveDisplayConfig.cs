@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using OvercookedTool.Core.Models;
 
@@ -506,7 +506,7 @@ internal sealed class SaveDisplayConfig
         return Regex.Replace(
             segment,
             @"[A-Za-z0-9]+", // 匹配连续的英文字母或数字
-            // 对于每个匹配到的单词，尝试在字典中查找翻译，找不到则保留原词
+                             // 对于每个匹配到的单词，尝试在字典中查找翻译，找不到则保留原词
             m => _ruleSegmentTranslations.TryGetValue(m.Value, out var token) ? token : m.Value,
             RegexOptions.CultureInvariant);
     }

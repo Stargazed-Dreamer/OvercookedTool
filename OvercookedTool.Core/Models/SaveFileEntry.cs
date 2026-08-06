@@ -1,4 +1,4 @@
-﻿namespace OvercookedTool.Core.Models;
+namespace OvercookedTool.Core.Models;
 
 /// <summary>
 /// 表示存档文件的条目信息，用于管理游戏或应用的存档数据。

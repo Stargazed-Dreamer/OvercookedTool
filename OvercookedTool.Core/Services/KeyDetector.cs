@@ -1,4 +1,4 @@
-﻿﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using OvercookedTool.Core.Crypto;
 using OvercookedTool.Core.Models;
 
@@ -36,7 +36,7 @@ public sealed class KeyDetector
         // 构建候选密钥列表并选择第一个非元数据存档文件用于探测
         var candidates = BuildCandidates(packagePath, preferredKey, unityDeviceId);
         var probe = saves.FirstOrDefault(x => !x.IsMeta) ?? saves.FirstOrDefault();
-        
+
         // 若无存档文件可用，则使用候选列表中的第一个密钥作为未验证的回退方案
         if (probe is null)
         {
@@ -106,7 +106,7 @@ public sealed class KeyDetector
     private static IReadOnlyList<(string Key, string Source)> BuildCandidates(string packagePath, string? preferredKey, string? unityDeviceId)
     {
         var list = new List<(string Key, string Source)>();
-        
+
         // 定义本地函数，用于添加不重复且非空的密钥
         void Add(string? key, string source)
         {

@@ -1,4 +1,4 @@
-﻿namespace OvercookedTool.App;
+namespace OvercookedTool.App;
 
 /// <summary>
 /// 这是一个用于添加存档的对话框类，继承自Form，提供用户输入存档档位、DLC编号和预设选项的界面。

@@ -1,4 +1,4 @@
-﻿namespace OvercookedTool.Core.Models;
+namespace OvercookedTool.Core.Models;
 
 /// <summary>
 /// TransferResult 类用于表示文件传输操作的结果。

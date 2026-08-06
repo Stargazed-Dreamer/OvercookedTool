@@ -1,4 +1,4 @@
-﻿using OvercookedTool.Core.Models;
+using OvercookedTool.Core.Models;
 
 namespace OvercookedTool.App;
 

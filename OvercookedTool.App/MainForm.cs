@@ -1,4 +1,4 @@
-﻿﻿﻿using System.Diagnostics;
+using System.Diagnostics;
 using OvercookedTool.Core.Logging;
 using OvercookedTool.Core.Models;
 using OvercookedTool.Core.Services;

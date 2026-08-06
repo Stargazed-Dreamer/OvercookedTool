@@ -43,8 +43,6 @@ jobs:
       - name: 运行测试（Release，使用合成 fixtures）
         run: dotnet test OvercookedTool.sln -c Release --no-build --no-restore --verbosity normal
 
-      # 代码风格验证：现有源码（行尾/编码/导入顺序）尚未完全对齐 .editorconfig，
-      # 此处仅作 informational 检查，不阻断 CI。后续可逐步修复源码后改为阻断。
-      - name: 验证代码风格（dotnet format，非阻断）
-        continue-on-error: true
+      # 代码风格验证：源码已对齐 .editorconfig（行尾/编码/导入顺序），format 阻断 CI。
+      - name: 验证代码风格（dotnet format）
         run: dotnet format --verify-no-changes OvercookedTool.sln

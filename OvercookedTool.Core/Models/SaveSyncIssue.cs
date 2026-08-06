@@ -1,4 +1,4 @@
-﻿namespace OvercookedTool.Core.Models;
+namespace OvercookedTool.Core.Models;
 
 /// <summary>
 /// 表示保存同步问题的类型枚举。

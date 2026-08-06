@@ -1,4 +1,4 @@
-﻿namespace OvercookedTool.App;
+namespace OvercookedTool.App;
 
 /// <summary>
 /// 表示“关于”窗口的窗体类，用于展示应用程序的版本、作者、链接等信息。

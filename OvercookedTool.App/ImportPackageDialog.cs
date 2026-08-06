@@ -1,5 +1,5 @@
-﻿using OvercookedTool.Core.Services;
 using System.ComponentModel;
+using OvercookedTool.Core.Services;
 
 namespace OvercookedTool.App;
 

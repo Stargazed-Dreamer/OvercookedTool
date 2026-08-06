@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using OvercookedTool.Core.Models;
@@ -297,27 +297,27 @@ internal sealed class MetaTableEditorForm : Form
                 switch (row.EntryMode)
                 {
                     case MetaEntryMode.JsonField:
-                    {
-                        // 对于 JsonField 模式，更新 JSON 对象中 "m_JSON" 字段的值。
-                        if (_entries[row.Index] is JsonObject obj)
                         {
-                            obj["m_JSON"] = value;
+                            // 对于 JsonField 模式，更新 JSON 对象中 "m_JSON" 字段的值。
+                            if (_entries[row.Index] is JsonObject obj)
+                            {
+                                obj["m_JSON"] = value;
+                            }
+                            break;
                         }
-                        break;
-                    }
                     case MetaEntryMode.Primitive:
-                    {
-                        // 对于基本类型模式，根据原始类型（数字、布尔、字符串）重新构建 JSON 值。
-                        _entries[row.Index] = BuildPrimitive(value, row.OriginalKind);
-                        break;
-                    }
+                        {
+                            // 对于基本类型模式，根据原始类型（数字、布尔、字符串）重新构建 JSON 值。
+                            _entries[row.Index] = BuildPrimitive(value, row.OriginalKind);
+                            break;
+                        }
                     default:
-                    {
-                        // 对于原始节点模式，直接将字符串值赋给数组元素。
-                        // 注意：这可能会改变节点的类型（从复杂对象变为字符串）。
-                        _entries[row.Index] = value;
-                        break;
-                    }
+                        {
+                            // 对于原始节点模式，直接将字符串值赋给数组元素。
+                            // 注意：这可能会改变节点的类型（从复杂对象变为字符串）。
+                            _entries[row.Index] = value;
+                            break;
+                        }
                 }
             }
 

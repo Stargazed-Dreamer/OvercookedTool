@@ -1,4 +1,4 @@
-﻿namespace OvercookedTool.App;
+namespace OvercookedTool.App;
 
 /// <summary>
 /// 应用程序设置类，用于存储应用配置参数。

@@ -1,4 +1,4 @@
-﻿namespace OvercookedTool.App;
+namespace OvercookedTool.App;
 
 /// <summary>
 /// 打赏窗体类，用于显示打赏信息和图片
