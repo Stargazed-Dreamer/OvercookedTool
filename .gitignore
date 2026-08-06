@@ -1,6 +1,41 @@
+# ===== 构建产物 =====
+**/bin/
+**/obj/
 **/Debug/
 **/Release/
 **/OvercookedSaveTool-Package/
+**/*.user
+**/*.suo
 **/.vs/
+
+# ===== .NET =====
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/Properties/launchSettings.json
+
+# ===== 真实存档样本（含个人账户信息，不入库） =====
+# 历史自带样本目录
+76561198000000002/
+# 其他任何以 SteamID64 数字命名的样本目录（10 位以上纯数字）
+[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]/
+
+# ===== 本地参考 / 临时样本（开发者私有） =====
 参考/
 temp/
+
+# ===== 日志与运行时产物 =====
+**/logs/
+*.log
+
+# ===== IDE / 编辑器 =====
+.idea/
+.vscode/
+*.swp
+*~
+
+# ===== OS =====
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store

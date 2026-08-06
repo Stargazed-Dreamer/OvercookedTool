@@ -1,4 +1,5 @@
-﻿using System.Text;
+using System.Globalization;
+using System.Text;
 
 namespace OvercookedTool.Core.Logging;
 
@@ -16,16 +17,26 @@ public static class AppLogger
     private static bool _initialized;
     // 标记日志记录功能是否启用，默认为 true（启用）
     private static bool _enabled = true;
+    // 日志保留天数，超过该天数的日志文件会在清理时被删除。0 表示永不清理。
+    private static int _maxRetentionDays = 30;
+    // 上一次执行日志清理的日期（按天节流，避免每次写入都扫描目录）
+    private static DateTime _lastCleanupDate = DateTime.MinValue;
 
     // 当日志被写入时触发的事件，传递日志行字符串
     public static event Action<string>? LogEmitted;
+
+    /// <summary>
+    /// 日志文件名前缀，清理逻辑据此匹配本工具产生的日志文件。
+    /// </summary>
+    private const string LogFilePrefix = "overcookedtool-";
 
     /// <summary>
     /// 初始化日志记录器。
     /// </summary>
     /// <param name="logDirectory">可选的日志目录路径，如果为 null 或空则使用默认目录。</param>
     /// <param name="enabled">是否启用日志记录功能，默认为 true。</param>
-    public static void Initialize(string? logDirectory = null, bool enabled = true)
+    /// <param name="maxRetentionDays">日志保留天数，超过该天数的日志会被清理；默认 30 天，传 0 表示永不清理。</param>
+    public static void Initialize(string? logDirectory = null, bool enabled = true, int maxRetentionDays = 30)
     {
         // 使用锁确保初始化过程的线程安全
         lock (SyncRoot)
@@ -38,6 +49,8 @@ public static class AppLogger
 
             // 设置日志启用状态
             _enabled = enabled;
+            // 规范化保留天数：负数视为 0（永不清理）
+            _maxRetentionDays = Math.Max(0, maxRetentionDays);
             // 如果提供了有效的日志目录，则更新 _logDirectory 字段
             if (!string.IsNullOrWhiteSpace(logDirectory))
             {
@@ -46,10 +59,11 @@ public static class AppLogger
 
             // 标记为已初始化
             _initialized = true;
-            // 如果日志功能启用，则创建日志目录并记录初始化信息
+            // 如果日志功能启用，则创建日志目录、清理过期日志并记录初始化信息
             if (_enabled)
             {
                 Directory.CreateDirectory(_logDirectory);
+                PurgeExpiredLogs(DateTime.Today);
                 Info("Logger initialized.");
             }
         }
@@ -72,6 +86,18 @@ public static class AppLogger
                 Directory.CreateDirectory(_logDirectory);
                 Write("INFO", "Logging enabled.");
             }
+        }
+    }
+
+    /// <summary>
+    /// 设置日志保留天数。超过该天数的日志文件会在下一次清理周期被删除。
+    /// </summary>
+    /// <param name="maxRetentionDays">保留天数，0 表示永不清理。</param>
+    public static void SetRetention(int maxRetentionDays)
+    {
+        lock (SyncRoot)
+        {
+            _maxRetentionDays = Math.Max(0, maxRetentionDays);
         }
     }
 
@@ -126,11 +152,92 @@ public static class AppLogger
             // 格式化日志行：包含时间戳、级别和消息
             var line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] [{level}] {message}";
             // 生成当日的日志文件路径，文件名基于日期
-            var filePath = Path.Combine(_logDirectory, $"overcookedtool-{DateTime.Now:yyyyMMdd}.log");
+            var filePath = Path.Combine(_logDirectory, $"{LogFilePrefix}{DateTime.Now:yyyyMMdd}.log");
             // 将日志行追加到文件中，使用 UTF-8 编码
             File.AppendAllText(filePath, line + Environment.NewLine, Encoding.UTF8);
             // 触发 LogEmitted 事件，通知订阅者
             LogEmitted?.Invoke(line);
+            // 按天节流清理过期日志（同一天内只执行一次）
+            TryPurgeExpiredLogs();
+        }
+    }
+
+    /// <summary>
+    /// 按天节流触发过期日志清理。同一天内只执行一次实际清理。
+    /// 必须在 SyncRoot 锁内调用。
+    /// </summary>
+    private static void TryPurgeExpiredLogs()
+    {
+        var today = DateTime.Today;
+        if (today == _lastCleanupDate)
+        {
+            return;
+        }
+
+        _lastCleanupDate = today;
+        PurgeExpiredLogs(today);
+    }
+
+    /// <summary>
+    /// 删除超过保留天数的日志文件。
+    /// 日志文件名形如 overcookedtool-yyyyMMdd.log，按文件名解析日期；无法解析的文件保留不动。
+    /// </summary>
+    /// <param name="today">当前日期，用于计算截止时间。</param>
+    private static void PurgeExpiredLogs(DateTime today)
+    {
+        if (_maxRetentionDays <= 0)
+        {
+            return;
+        }
+
+        if (!Directory.Exists(_logDirectory))
+        {
+            return;
+        }
+
+        var cutoff = today.AddDays(-_maxRetentionDays);
+        string[] files;
+        try
+        {
+            files = Directory.GetFiles(_logDirectory, $"{LogFilePrefix}*.log", SearchOption.TopDirectoryOnly);
+        }
+        catch
+        {
+            return;
+        }
+
+        foreach (var path in files)
+        {
+            var name = Path.GetFileNameWithoutExtension(path);
+            // 去掉前缀得到纯日期部分 yyyyMMdd
+            if (name.Length <= LogFilePrefix.Length)
+            {
+                continue;
+            }
+
+            var datePart = name[LogFilePrefix.Length..];
+            if (!DateTime.TryParseExact(
+                    datePart,
+                    "yyyyMMdd",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out var fileDate))
+            {
+                // 文件名无法解析为日期，跳过不删（避免误删非本工具日志）
+                continue;
+            }
+
+            if (fileDate < cutoff)
+            {
+                try
+                {
+                    File.Delete(path);
+                }
+                catch
+                {
+                    // 清理失败不影响主流程（文件可能被占用）
+                }
+            }
         }
     }
 }

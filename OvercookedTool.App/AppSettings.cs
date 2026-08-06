@@ -1,4 +1,4 @@
-﻿﻿namespace OvercookedTool.App;
+﻿namespace OvercookedTool.App;
 
 /// <summary>
 /// 应用程序设置类，用于存储应用配置参数。
@@ -15,6 +15,8 @@ internal sealed class AppSettings
     public bool EnableLogging { get; set; } = true;
     // 每次保存时的最大备份数
     public int MaxBackupPerSave { get; set; } = 10;
+    // 日志保留天数（超过该天数的日志会被自动清理，0 表示永不清理）
+    public int MaxLogRetentionDays { get; set; } = 30;
     // Unity 设备标识符，可为 null
     public string? UnityDeviceId { get; set; }
 }

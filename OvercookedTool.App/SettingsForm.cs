@@ -1,4 +1,4 @@
-﻿namespace OvercookedTool.App;
+namespace OvercookedTool.App;
 
 /// <summary>
 /// 设置窗体，用于应用程序的各项配置管理
@@ -9,11 +9,13 @@ internal sealed class SettingsForm : Form
     private readonly CheckBox _loggingCheck;       // 启用日志记录复选框
     private readonly NumericUpDown _maxHistory;    // 最近历史保留条数数值选择框
     private readonly NumericUpDown _maxBackup;     // 每个存档保留备份数数值选择框
+    private readonly NumericUpDown _maxLogRetention; // 日志保留天数数值选择框
 
     public bool EnableAutoDetectOnImport => _autoDetectCheck.Checked;    // 获取导入时是否自动检测路径的设置值
     public bool EnableLogging => _loggingCheck.Checked;                  // 获取是否启用日志记录的设置值
     public int MaxRecentCount => (int)_maxHistory.Value;                 // 获取最大历史记录条数的设置值
     public int MaxBackupPerSave => (int)_maxBackup.Value;                // 获取每个存档最大备份数的设置值
+    public int MaxLogRetentionDays => (int)_maxLogRetention.Value;       // 获取日志保留天数的设置值（0=永不清理）
 
     public SettingsForm(AppSettings settings)
     {
@@ -63,6 +65,7 @@ internal sealed class SettingsForm : Form
             BackColor = Color.White,
             Margin = new Padding(0),
         };
+        card.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         card.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         card.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         card.RowStyles.Add(new RowStyle(SizeType.AutoSize));
@@ -128,6 +131,27 @@ internal sealed class SettingsForm : Form
         backupRow.Controls.Add(new Label { Text = "(默认10)", AutoSize = true, Margin = new Padding(8, 8, 0, 0), ForeColor = Color.FromArgb(96, 96, 96) });
         card.Controls.Add(backupRow, 0, 3);
 
+        // 创建日志保留天数设置行
+        var logRetentionRow = new FlowLayoutPanel
+        {
+            AutoSize = true,
+            FlowDirection = FlowDirection.LeftToRight,
+            Margin = new Padding(0, 2, 0, 0),
+        };
+        logRetentionRow.Controls.Add(new Label { Text = "日志保留天数:", AutoSize = true, Margin = new Padding(0, 8, 6, 0) });
+        // 初始化日志保留天数数值选择框，限制在0-365范围内（0=永不清理）
+        _maxLogRetention = new NumericUpDown
+        {
+            Minimum = 0,
+            Maximum = 365,
+            Value = Math.Clamp(settings.MaxLogRetentionDays, 0, 365),
+            Width = 90,
+        };
+        logRetentionRow.Controls.Add(_maxLogRetention);
+        // 添加说明提示标签
+        logRetentionRow.Controls.Add(new Label { Text = "(0=永不清理, 默认30)", AutoSize = true, Margin = new Padding(8, 8, 0, 0), ForeColor = Color.FromArgb(96, 96, 96) });
+        card.Controls.Add(logRetentionRow, 0, 4);
+
         // 将设置卡片添加到主容器
         root.Controls.Add(card, 0, 1);
 
@@ -137,7 +161,7 @@ internal sealed class SettingsForm : Form
             AutoSize = false,
             Dock = DockStyle.Top,
             MaximumSize = new Size(1000, 0),
-            Text = "日志关闭后将不再写入 logs 目录。备份保留数会应用到后续新增的备份。",
+            Text = "日志关闭后将不再写入 logs 目录。备份保留数会应用到后续新增的备份。日志保留天数控制自动清理超过该天数的日志文件（0=永不清理）。",
             ForeColor = Color.FromArgb(92, 92, 92),
             Margin = new Padding(0, 10, 0, 8),
         };

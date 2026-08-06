@@ -1,4 +1,4 @@
-﻿using OvercookedTool.Core.Logging;
+using OvercookedTool.Core.Logging;
 
 namespace OvercookedTool.App;
 
@@ -14,8 +14,8 @@ internal static class Program
         var settings = AppSettingsStore.Load();
         // 设置日志目录路径，基于应用程序基目录
         var logDir = Path.Combine(AppContext.BaseDirectory, "logs");
-        // 初始化日志记录器，根据设置启用或禁用日志
-        AppLogger.Initialize(logDir, settings.EnableLogging);
+        // 初始化日志记录器，根据设置启用或禁用日志，并应用日志保留天数
+        AppLogger.Initialize(logDir, settings.EnableLogging, settings.MaxLogRetentionDays);
 
         // 注册AppDomain未处理异常事件处理器，用于捕获全局未处理异常
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>

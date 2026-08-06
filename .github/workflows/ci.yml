@@ -1,0 +1,50 @@
+name: CI (Build & Test)
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & Test (windows-latest)
+    runs-on: windows-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 .NET SDK 9.0.x
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: 缓存 NuGet 包
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/Directory.Build.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: 还原依赖
+        run: dotnet restore OvercookedTool.sln
+
+      - name: 构建 Release（警告视为错误）
+        run: dotnet build OvercookedTool.sln -c Release --no-restore /warnaserror
+
+      - name: 运行测试（Release，使用合成 fixtures）
+        run: dotnet test OvercookedTool.sln -c Release --no-build --no-restore --verbosity normal
+
+      # 代码风格验证：现有源码（行尾/编码/导入顺序）尚未完全对齐 .editorconfig，
+      # 此处仅作 informational 检查，不阻断 CI。后续可逐步修复源码后改为阻断。
+      - name: 验证代码风格（dotnet format，非阻断）
+        continue-on-error: true
+        run: dotnet format --verify-no-changes OvercookedTool.sln

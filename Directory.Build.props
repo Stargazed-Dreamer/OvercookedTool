@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <PropertyGroup>
+    <!-- 统一产品信息 -->
+    <Product>胡闹厨房存档管理器</Product>
+    <Authors>OvercookedTool</Authors>
+    <Copyright>Copyright © 2026 OvercookedTool</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/OvercookedTool/OvercookedTool</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <!-- 统一版本号（语义化版本） -->
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+
+    <!-- 统一语言与框架特性 -->
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+
+    <!-- 本地化：中文项目，统一为 zh-CN -->
+    <NeutralLanguage>zh-CN</NeutralLanguage>
+  </PropertyGroup>
+
+</Project>

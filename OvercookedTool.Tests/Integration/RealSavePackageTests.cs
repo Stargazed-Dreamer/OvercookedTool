@@ -9,120 +9,72 @@ using OvercookedTool.Tests.Helpers;
 namespace OvercookedTool.Tests.Integration;
 
 /// <summary>
-/// 集成测试：基于仓库内自带的 OC2 真实存档目录 76561198000000002/。
+/// 集成测试：基于 <see cref="SyntheticSampleFactory"/> 生成的脱敏合成 OC2 存档包。
 ///
-/// 重要发现：仓库内的样本目录混合了来自不同 Steam 账户的存档：
-///   - 可用密钥 76561198000000002 解密：CoopSlot_SaveFile_0/1/2.save + Meta_SaveFile.save
-///   - 无法解密（疑似来自其他账户）：CoopSlot_SaveFile_3/4.save + 所有 DLC 存档
-///   - 所有文件的 CRC32 校验均通过，说明文件本身未损坏
-///
-/// 因此本测试类对"每个文件都解密"的断言做了软化处理：
-///   - 单文件参数化测试：若该文件不可解密则跳过（不算失败）
-///   - 单独提供 Diagnostic_ListNonDecryptableFiles 测试列出不可解密文件
-///   - 端到端测试只针对已知可解密文件做断言
+/// 合成包内所有文件均可用 <see cref="SyntheticSampleFactory.SteamId64Key"/> 解密并通过 CRC 校验，
+/// 不依赖任何真实账户数据，可在 CI 中稳定运行。每个测试实例在临时目录创建独立的合成包，
+/// 测试结束自动清理。
 /// </summary>
-public class RealSavePackageTests
+public class RealSavePackageTests : IDisposable
 {
-    private static bool IsSampleAvailable => TestSamplePaths.IsAvailable(TestSamplePaths.BuiltInOc2SampleDir);
+    private readonly string _packageDir;
 
-    /// <summary>
-    /// 已知可用样本密钥解密的文件清单（白名单）。
-    /// </summary>
-    private static readonly HashSet<string> KnownDecryptableFiles = new(StringComparer.OrdinalIgnoreCase)
+    public RealSavePackageTests()
     {
-        "CoopSlot_SaveFile_0.save",
-        "CoopSlot_SaveFile_1.save",
-        "CoopSlot_SaveFile_2.save",
-        "Meta_SaveFile.save",
-    };
+        // 每个测试实例创建独立的合成包，保证测试间隔离
+        _packageDir = SyntheticSampleFactory.CreateOc2Package();
+    }
 
-    /// <summary>
-    /// 若样本目录不可用则跳过测试。
-    /// </summary>
-    private static void EnsureSampleAvailable()
+    public void Dispose()
     {
-        Skip.IfNot(IsSampleAvailable, $"未找到 OC2 样本目录 {TestSamplePaths.BuiltInOc2SampleDir}，跳过依赖真实存档的测试。");
+        SyntheticSampleFactory.Cleanup(_packageDir);
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
-    /// 若指定样本文件不可解密则跳过该测试用例。
+    /// 通过一次性探测包枚举合成目录下所有 .save 文件名。
+    /// 由于 <see cref="SyntheticSampleFactory.CreateOc2Package"/> 生成的文件名是确定性的，
+    /// 探测得到的清单与每个测试实例创建的包内容一致。
     /// </summary>
-    private static void EnsureFileDecryptable(string fileName)
+    private static readonly Lazy<string[]> SaveFileNames = new(() =>
     {
-        EnsureSampleAvailable();
-        var path = Path.Combine(TestSamplePaths.BuiltInOc2SampleDir, fileName);
-        var bytes = File.ReadAllBytes(path);
-        var ok = OvercookedCrypto.TryDecryptToJsonText(bytes, TestSamplePaths.BuiltInOc2SampleKey, out _, ignoreCrc: false);
-        Skip.IfNot(ok, $"文件 {fileName} 无法用密钥 {TestSamplePaths.BuiltInOc2SampleKey} 解密（疑似来自其他 Steam 账户），跳过。");
-    }
-
-    /// <summary>
-    /// 列出样本目录中所有 .save 文件，用于参数化测试。
-    /// </summary>
-    public static IEnumerable<object[]> AllSaveFiles
-    {
-        get
+        var probe = SyntheticSampleFactory.CreateOc2Package();
+        try
         {
-            if (!IsSampleAvailable) yield break;
-            foreach (var f in Directory.GetFiles(TestSamplePaths.BuiltInOc2SampleDir, "*.save", SearchOption.TopDirectoryOnly))
-            {
-                yield return new object[] { Path.GetFileName(f) };
-            }
+            return Directory.GetFiles(probe, "*.save", SearchOption.TopDirectoryOnly)
+                .Select(f => Path.GetFileName(f) ?? string.Empty)
+                .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
         }
-    }
+        finally
+        {
+            SyntheticSampleFactory.Cleanup(probe);
+        }
+    });
 
     /// <summary>
-    /// 仅列出已知可解密的文件，用于需要严格断言的测试。
+    /// 合成目录下所有 .save 文件，用于参数化测试。
     /// </summary>
-    public static IEnumerable<object[]> KnownDecryptableSaveFiles
-    {
-        get
-        {
-            if (!IsSampleAvailable) yield break;
-            foreach (var name in AllSaveFiles.Select(x => (string)x[0]))
-            {
-                if (KnownDecryptableFiles.Contains(name))
-                {
-                    yield return new object[] { name };
-                }
-            }
-        }
-    }
+    public static IEnumerable<object[]> AllSaveFiles =>
+        SaveFileNames.Value.Select(n => new object[] { n });
 
     /// <summary>
-    /// 诊断测试：列出所有不可解密的文件。该测试始终通过，仅用于报告。
+    /// 合成目录下所有非 Meta 的 .save 文件。
     /// </summary>
-    [SkippableFact]
-    public void Diagnostic_ListNonDecryptableFiles()
-    {
-        EnsureSampleAvailable();
-        var nonDecryptable = new List<string>();
-        foreach (var file in AllSaveFiles.Select(x => (string)x[0]))
-        {
-            var path = Path.Combine(TestSamplePaths.BuiltInOc2SampleDir, file);
-            var bytes = File.ReadAllBytes(path);
-            if (!OvercookedCrypto.TryDecryptToJsonText(bytes, TestSamplePaths.BuiltInOc2SampleKey, out _, ignoreCrc: false))
-            {
-                nonDecryptable.Add(file);
-            }
-        }
-
-        // 输出到测试输出（ITestOutputHelper 在 SkippableFact 中可用，但这里用 Assert.Equal 配合消息输出）
-        // 测试始终通过，仅做记录
-        Assert.True(true, $"不可解密文件清单（共 {nonDecryptable.Count} 个）: {string.Join(", ", nonDecryptable)}。" +
-                          "这些文件疑似来自其他 Steam 账户，本测试不视为失败。");
-    }
+    public static IEnumerable<object[]> NonMetaSaveFiles =>
+        SaveFileNames.Value
+            .Where(n => !n.StartsWith("Meta", StringComparison.OrdinalIgnoreCase))
+            .Select(n => new object[] { n });
 
     /// <summary>
     /// 每一个 .save 都应该通过独立的 CRC32 校验（不依赖密钥即可验证文件未损坏）。
     /// 使用独立实现的 CRC32（与 OvercookedCrypto 内部算法一致）做交叉验证。
     /// </summary>
-    [SkippableTheory]
+    [Theory]
     [MemberData(nameof(AllSaveFiles))]
     public void EachSaveFile_Crc32Matches_UsingIndependentCrc32(string fileName)
     {
-        EnsureSampleAvailable();
-        var path = Path.Combine(TestSamplePaths.BuiltInOc2SampleDir, fileName);
+        var path = Path.Combine(_packageDir, fileName);
         var bytes = File.ReadAllBytes(path);
 
         // 至少需要 4 字节存放 CRC
@@ -160,18 +112,16 @@ public class RealSavePackageTests
     }
 
     /// <summary>
-    /// 每一个可解密的 .save 都应该解出有效 JSON。
+    /// 每一个 .save 都应该解出有效 JSON。合成包所有文件均可解密。
     /// </summary>
-    [SkippableTheory]
+    [Theory]
     [MemberData(nameof(AllSaveFiles))]
-    public void EachDecryptableSave_ProducesValidJson(string fileName)
+    public void EachSave_ProducesValidJson(string fileName)
     {
-        EnsureFileDecryptable(fileName);
-
-        var path = Path.Combine(TestSamplePaths.BuiltInOc2SampleDir, fileName);
+        var path = Path.Combine(_packageDir, fileName);
         var bytes = File.ReadAllBytes(path);
 
-        var ok = OvercookedCrypto.TryDecryptToJsonText(bytes, TestSamplePaths.BuiltInOc2SampleKey, out var json, ignoreCrc: false);
+        var ok = OvercookedCrypto.TryDecryptToJsonText(bytes, SyntheticSampleFactory.SteamId64Key, out var json, ignoreCrc: false);
 
         Assert.True(ok, $"文件 {fileName} 解密失败或 JSON 校验失败");
         Assert.False(string.IsNullOrWhiteSpace(json));
@@ -181,47 +131,41 @@ public class RealSavePackageTests
     }
 
     /// <summary>
-    /// 所有可解密的非 Meta 存档都应被检测为 Oc2 版本。
+    /// 所有非 Meta 存档都应被检测为 Oc2 版本。
     /// </summary>
-    [SkippableTheory]
-    [MemberData(nameof(AllSaveFiles))]
-    public void EachDecryptableSave_DetectedAsOc2_ExceptMeta(string fileName)
+    [Theory]
+    [MemberData(nameof(NonMetaSaveFiles))]
+    public void EachNonMetaSave_DetectedAsOc2(string fileName)
     {
-        EnsureFileDecryptable(fileName);
-
-        var path = Path.Combine(TestSamplePaths.BuiltInOc2SampleDir, fileName);
+        var path = Path.Combine(_packageDir, fileName);
         var bytes = File.ReadAllBytes(path);
 
-        var ok = OvercookedCrypto.TryDecryptToJsonText(bytes, TestSamplePaths.BuiltInOc2SampleKey, out var json, ignoreCrc: false);
+        var ok = OvercookedCrypto.TryDecryptToJsonText(bytes, SyntheticSampleFactory.SteamId64Key, out var json, ignoreCrc: false);
         Assert.True(ok);
 
-        if (!fileName.StartsWith("Meta", StringComparison.OrdinalIgnoreCase))
-        {
-            Assert.Equal(SaveVersion.Oc2, SaveJsonConverter.DetectVersion(json));
-        }
+        Assert.Equal(SaveVersion.Oc2, SaveJsonConverter.DetectVersion(json));
     }
 
     /// <summary>
     /// 加解密往返：解密 -> 加密 -> 解密 应保持 JSON 内容一致。
     /// </summary>
-    [SkippableFact]
+    [Fact]
     public void EncryptDecrypt_RoundTrip_OnRealSave_PreservesJsonContent()
     {
-        EnsureSampleAvailable();
-        var fileName = KnownDecryptableFiles.First(x => x.StartsWith("CoopSlot", StringComparison.OrdinalIgnoreCase));
-        var path = Path.Combine(TestSamplePaths.BuiltInOc2SampleDir, fileName);
+        var fileName = "CoopSlot_SaveFile_0.save";
+        var path = Path.Combine(_packageDir, fileName);
         var bytes = File.ReadAllBytes(path);
 
-        var plain1 = OvercookedCrypto.DecryptData(bytes, TestSamplePaths.BuiltInOc2SampleKey, ignoreCrc: false);
+        var plain1 = OvercookedCrypto.DecryptData(bytes, SyntheticSampleFactory.SteamId64Key, ignoreCrc: false);
         Assert.NotNull(plain1);
         var json1 = Encoding.UTF8.GetString(plain1!);
 
         // 用同一密钥重新加密（IV 会随机生成）
-        var reEncrypted = OvercookedCrypto.EncryptData(plain1!, TestSamplePaths.BuiltInOc2SampleKey);
+        var reEncrypted = OvercookedCrypto.EncryptData(plain1!, SyntheticSampleFactory.SteamId64Key);
         Assert.NotNull(reEncrypted);
 
         // 再次解密应得到相同的 JSON 内容
-        var plain2 = OvercookedCrypto.DecryptData(reEncrypted!, TestSamplePaths.BuiltInOc2SampleKey, ignoreCrc: false);
+        var plain2 = OvercookedCrypto.DecryptData(reEncrypted!, SyntheticSampleFactory.SteamId64Key, ignoreCrc: false);
         Assert.NotNull(plain2);
         var json2 = Encoding.UTF8.GetString(plain2!);
 
@@ -240,16 +184,15 @@ public class RealSavePackageTests
     /// 修复方案：用 TransformFinalBlock 替代 CryptoStream.Read，自动去除 PKCS7 填充，
     /// 返回真实明文长度。重新加密后密文长度与原始一致。
     /// </remarks>
-    [SkippableFact]
+    [Fact]
     public void Padding_GameUsesPkcs7_ReencryptedFileHasSameCipherLength()
     {
-        EnsureSampleAvailable();
-        var fileName = KnownDecryptableFiles.First(x => x.StartsWith("CoopSlot", StringComparison.OrdinalIgnoreCase));
-        var path = Path.Combine(TestSamplePaths.BuiltInOc2SampleDir, fileName);
+        var fileName = "CoopSlot_SaveFile_0.save";
+        var path = Path.Combine(_packageDir, fileName);
         var bytes = File.ReadAllBytes(path);
 
-        var plain = OvercookedCrypto.DecryptData(bytes, TestSamplePaths.BuiltInOc2SampleKey, ignoreCrc: false)!;
-        var reEncrypted = OvercookedCrypto.EncryptData(plain, TestSamplePaths.BuiltInOc2SampleKey)!;
+        var plain = OvercookedCrypto.DecryptData(bytes, SyntheticSampleFactory.SteamId64Key, ignoreCrc: false)!;
+        var reEncrypted = OvercookedCrypto.EncryptData(plain, SyntheticSampleFactory.SteamId64Key)!;
 
         // 原始密文长度 = 文件大小 - 16 (IV) - 4 (CRC)
         var originalCipherLen = bytes.Length - 16 - 4;
@@ -282,14 +225,13 @@ public class RealSavePackageTests
     /// <summary>
     /// 转换往返：Oc2 → Ayce → Oc2 应保留所有 Level_ 条目的核心字段（除 FailedAttempts 外）。
     /// </summary>
-    [SkippableFact]
+    [Fact]
     public void Convert_RoundTrip_Oc2ToAyceToOc2_PreservesLevelFields()
     {
-        EnsureSampleAvailable();
-        var fileName = KnownDecryptableFiles.First(x => x.StartsWith("CoopSlot", StringComparison.OrdinalIgnoreCase));
-        var path = Path.Combine(TestSamplePaths.BuiltInOc2SampleDir, fileName);
+        var fileName = "CoopSlot_SaveFile_0.save";
+        var path = Path.Combine(_packageDir, fileName);
         var bytes = File.ReadAllBytes(path);
-        var ok = OvercookedCrypto.TryDecryptToJsonText(bytes, TestSamplePaths.BuiltInOc2SampleKey, out var originalJson, ignoreCrc: false);
+        var ok = OvercookedCrypto.TryDecryptToJsonText(bytes, SyntheticSampleFactory.SteamId64Key, out var originalJson, ignoreCrc: false);
         Assert.True(ok);
 
         var toAyce = SaveJsonConverter.Convert(originalJson, SaveVersion.Oc2, SaveVersion.Ayce);
@@ -333,16 +275,15 @@ public class RealSavePackageTests
     /// <summary>
     /// 加密后的存档字节布局与原文件结构一致：IV(16) + 密文 + CRC(4)，密文为 16 的倍数。
     /// </summary>
-    [SkippableFact]
+    [Fact]
     public void ReEncryptedSave_HasValidLayout_IvPlusCipherPlusCrc()
     {
-        EnsureSampleAvailable();
-        var fileName = KnownDecryptableFiles.First(x => x.StartsWith("CoopSlot", StringComparison.OrdinalIgnoreCase));
-        var path = Path.Combine(TestSamplePaths.BuiltInOc2SampleDir, fileName);
+        var fileName = "CoopSlot_SaveFile_0.save";
+        var path = Path.Combine(_packageDir, fileName);
         var bytes = File.ReadAllBytes(path);
 
-        var plain = OvercookedCrypto.DecryptData(bytes, TestSamplePaths.BuiltInOc2SampleKey, ignoreCrc: false)!;
-        var reEncrypted = OvercookedCrypto.EncryptData(plain, TestSamplePaths.BuiltInOc2SampleKey)!;
+        var plain = OvercookedCrypto.DecryptData(bytes, SyntheticSampleFactory.SteamId64Key, ignoreCrc: false)!;
+        var reEncrypted = OvercookedCrypto.EncryptData(plain, SyntheticSampleFactory.SteamId64Key)!;
 
         Assert.True(reEncrypted.Length > 16 + 4);
         Assert.Equal(0, (reEncrypted.Length - 16 - 4) % 16);
@@ -351,35 +292,37 @@ public class RealSavePackageTests
     // ===== SavePackageService 端到端 =====
 
     /// <summary>
-    /// 端到端：SavePackageService 能加载样本目录，识别为 Oc2Binary 平台、Oc2 版本、密钥校验通过。
+    /// 端到端：SavePackageService 能加载合成包目录，识别为 Oc2Binary 平台、Oc2 版本、密钥校验通过，
+    /// 并从 steam_autocloud.vdf 提取出与 SteamID64 对应的 accountid 好友代码。
     /// </summary>
-    [SkippableFact]
+    [Fact]
     public void SavePackageService_LoadPackage_OnRealSample_RecognizesOc2BinaryAndSteamId64Key()
     {
-        EnsureSampleAvailable();
         var service = new SavePackageService();
-        var package = service.LoadPackage(TestSamplePaths.BuiltInOc2SampleDir);
+        var package = service.LoadPackage(_packageDir);
 
         Assert.Equal(SavePlatform.Oc2Binary, package.Platform);
         Assert.Equal(SaveVersion.Oc2, package.Version);
-        Assert.Equal(TestSamplePaths.BuiltInOc2SampleKey, package.DetectedKey);
+        Assert.Equal(SyntheticSampleFactory.SteamId64Key, package.DetectedKey);
         Assert.True(package.KeyValidated);
         Assert.NotEmpty(package.Saves);
         Assert.Contains(package.Saves, x => !x.IsMeta);
         Assert.Contains(package.Saves, x => x.IsMeta);
-        Assert.False(string.IsNullOrEmpty(package.FriendCode));
+        // FriendCode 应为 steam_autocloud.vdf 中的 accountid，
+        // 即 SteamID64 - 76561197960265728 = 39734274
+        var expectedAccountId = (ulong.Parse(SyntheticSampleFactory.SteamId64Key) - 76561197960265728UL).ToString();
+        Assert.Equal(expectedAccountId, package.FriendCode);
     }
 
     /// <summary>
-    /// 所有已知可解密的非 Meta 存档都应该能通过 SavePackageService.ReadSaveAsJson 读出有效 JSON。
+    /// 所有非 Meta 存档都应该能通过 SavePackageService.ReadSaveAsJson 读出有效 JSON。
     /// </summary>
-    [SkippableTheory]
-    [MemberData(nameof(KnownDecryptableSaveFiles))]
-    public void SavePackageService_ReadSaveAsJson_KnownDecryptableSucceed(string fileName)
+    [Theory]
+    [MemberData(nameof(NonMetaSaveFiles))]
+    public void SavePackageService_ReadSaveAsJson_AllNonMetaSucceed(string fileName)
     {
-        EnsureSampleAvailable();
         var service = new SavePackageService();
-        var package = service.LoadPackage(TestSamplePaths.BuiltInOc2SampleDir);
+        var package = service.LoadPackage(_packageDir);
         var save = package.Saves.FirstOrDefault(x => string.Equals(x.FileName, fileName, StringComparison.OrdinalIgnoreCase));
         Assert.NotNull(save);
 
@@ -390,29 +333,28 @@ public class RealSavePackageTests
     }
 
     /// <summary>
-    /// 已知可解密存档的星级统计应被正确填充。
+    /// 所有非 Meta 存档的星级统计应被正确填充（非 null 且 >= 0）。
     /// </summary>
-    [SkippableTheory]
-    [MemberData(nameof(KnownDecryptableSaveFiles))]
-    public void SavePackageService_StarCount_KnownDecryptableHaveValidStars(string fileName)
+    [Theory]
+    [MemberData(nameof(NonMetaSaveFiles))]
+    public void SavePackageService_StarCount_PopulatedForNonMetaSaves(string fileName)
     {
-        EnsureSampleAvailable();
         var service = new SavePackageService();
-        var package = service.LoadPackage(TestSamplePaths.BuiltInOc2SampleDir);
+        var package = service.LoadPackage(_packageDir);
         var save = package.Saves.FirstOrDefault(x => string.Equals(x.FileName, fileName, StringComparison.OrdinalIgnoreCase));
         Assert.NotNull(save);
-        Assert.True(save!.StarCount is null || save.StarCount >= 0);
+        Assert.NotNull(save!.StarCount);
+        Assert.True(save.StarCount >= 0);
     }
 
     /// <summary>
-    /// DLC 分组应该被正确识别。注意：DLC 存档本身可能不可解密，但文件名解析应能识别 DlcId。
+    /// DLC 分组应该被正确识别。合成包含 DLC2/3/5/7/8。
     /// </summary>
-    [SkippableFact]
+    [Fact]
     public void SavePackageService_DlcGroups_AreCorrectlyIdentifiedFromFilenames()
     {
-        EnsureSampleAvailable();
         var service = new SavePackageService();
-        var package = service.LoadPackage(TestSamplePaths.BuiltInOc2SampleDir);
+        var package = service.LoadPackage(_packageDir);
 
         var dlcIds = package.Saves
             .Where(x => x.DlcId.HasValue)
@@ -431,21 +373,20 @@ public class RealSavePackageTests
 
     /// <summary>
     /// 写回测试：读出 JSON -> 原样写回 -> 再读出应一致（不破坏存档结构）。
-    /// 此测试需要把已知密钥传给临时目录的 LoadPackage，否则无法探测密钥。
+    /// 临时目录没有 steam_autocloud.vdf，需显式传入密钥。
     /// </summary>
-    [SkippableFact]
+    [Fact]
     public void SavePackageService_WriteBack_PreservesJsonContent()
     {
-        EnsureSampleAvailable();
         var service = new SavePackageService();
-        var package = service.LoadPackage(TestSamplePaths.BuiltInOc2SampleDir);
+        var package = service.LoadPackage(_packageDir);
 
         var tempDir = Path.Combine(Path.GetTempPath(), "oct-writeback-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempDir);
         try
         {
-            // 选一个已知可解密的非 Meta 存档
-            var src = package.Saves.First(x => !x.IsMeta && KnownDecryptableFiles.Contains(x.FileName));
+            // 选一个非 Meta 存档（合成包内所有文件均可解密）
+            var src = package.Saves.First(x => !x.IsMeta);
             var json = service.ReadSaveAsJson(package, src);
             var key = package.DetectedKey ?? throw new InvalidOperationException("样本包应已探测到密钥");
 
@@ -462,7 +403,7 @@ public class RealSavePackageTests
         }
         finally
         {
-            Directory.Delete(tempDir, recursive: true);
+            try { Directory.Delete(tempDir, recursive: true); } catch { }
         }
     }
 

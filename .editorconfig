@@ -1,0 +1,66 @@
+# EditorConfig: https://editorconfig.org/
+# 适用于整个仓库的代码风格与格式约定，VS / VSCode / Rider / dotnet format 均识别。
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# 源码文件
+[*.{cs,csx}]
+indent_size = 4
+
+# 项目与配置文件
+[*.{csproj,props,targets,xml,config,json}]
+indent_size = 2
+
+# 脚本
+[*.{ps1,sh}]
+indent_size = 4
+
+[*.{bat,cmd}]
+end_of_line = crlf
+
+# Markdown 保持尾随空格（两空格换行）
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# ===== C# 代码风格 =====
+[*.cs]
+# 命名规范：与现有代码一致（PascalCase 公共成员，private 字段 _camelCase）
+dotnet_naming_rule.public_members_must_be_pascal_case.symbols = public_symbols
+dotnet_naming_rule.public_members_must_be_pascal_case.style = pascal_case_style
+dotnet_naming_rule.public_members_must_be_pascal_case.severity = suggestion
+
+dotnet_naming_symbols.public_symbols.applicable_kinds = property,method,event,field
+dotnet_naming_symbols.public_symbols.applicable_accessibilities = public
+
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+# 语言习惯
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_object_init = true
+csharp_new_line_before_members_in_anonymous_types = true
+csharp_prefer_braces = true:suggestion
+csharp_style_namespace_declarations = file_scoped:suggestion
+csharp_style_var_for_built_in_types = false:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_expression_bodied_methods = false:silent
+csharp_using_directive_placement = outside_namespace:suggestion
+
+# .NET 偏好
+dotnet_sort_system_directives_first = true
+dotnet_style_readonly_field = true:suggestion
+dotnet_style_prefer_auto_properties = true:silent
+dotnet_style_qualification_for_field = false:silent
+dotnet_style_qualification_for_property = false:silent
+dotnet_style_qualification_for_method = false:silent

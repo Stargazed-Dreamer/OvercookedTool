@@ -7,9 +7,8 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Nullable / ImplicitUsings / 版本号统一在 Directory.Build.props 管理 -->
   </PropertyGroup>
 
   <ItemGroup>

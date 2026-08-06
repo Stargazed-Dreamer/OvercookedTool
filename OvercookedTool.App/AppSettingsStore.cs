@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 
 namespace OvercookedTool.App;
 
@@ -27,6 +27,7 @@ internal static class AppSettingsStore
             var settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings(); // 反序列化JSON，若失败则使用默认设置
             settings.MaxRecentCount = Math.Clamp(settings.MaxRecentCount, 1, 100); // 约束最近项目数量在1到100之间
             settings.MaxBackupPerSave = Math.Clamp(settings.MaxBackupPerSave, 1, 50); // 约束每次保存的备份数量在1到50之间
+            settings.MaxLogRetentionDays = Math.Clamp(settings.MaxLogRetentionDays, 0, 365); // 约束日志保留天数在0到365之间（0=永不清理）
             return settings;
         }
         catch

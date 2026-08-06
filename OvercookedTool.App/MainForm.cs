@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using System.Diagnostics;
+﻿﻿﻿using System.Diagnostics;
 using OvercookedTool.Core.Logging;
 using OvercookedTool.Core.Models;
 using OvercookedTool.Core.Services;
@@ -161,8 +161,10 @@ internal sealed class MainForm : Form
         _settings.MaxRecentCount = dialog.MaxRecentCount;
         _settings.EnableLogging = dialog.EnableLogging;
         _settings.MaxBackupPerSave = dialog.MaxBackupPerSave;
+        _settings.MaxLogRetentionDays = dialog.MaxLogRetentionDays;
         _saveService.BackupHistoryPerSave = _settings.MaxBackupPerSave;
         AppLogger.SetEnabled(_settings.EnableLogging);
+        AppLogger.SetRetention(_settings.MaxLogRetentionDays);
 
         // 裁剪最近打开路径列表，使其不超过最大数量
         while (_settings.RecentPackagePaths.Count > _settings.MaxRecentCount)
