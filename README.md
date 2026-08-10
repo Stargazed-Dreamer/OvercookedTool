@@ -2,24 +2,28 @@
 
 胡闹厨房（Overcooked! 2 / Overcooked! All You Can Eat）存档管理器：多存档包标签页、自动识别平台与密钥、OC2 ↔ AYCE 版本转换、JSON 与表格编辑、备份与历史时间线、同步诊断与冲突检测。基于 .NET 9 WinForms 的纯 C# 桌面工具。
 
+> **Windows 专有**：本项目基于 .NET 9 WinForms（`net9.0-windows`），仅支持 Windows。WinForms 是 Windows 专属 UI 框架，暂无跨平台计划。
+
 > 本项目由原 Python + C# 混合实现（PySide6 UI + `OvercookedLib.dll` + pythonnet）迁移为纯 C# .NET 9 解决方案，迁移历史见 [`迁移说明.md`](./迁移说明.md)。
 
 ## 功能特性
 
-- **自动识别存档平台/格式**：OC2 二进制 `.save`、AYCE JSON `.json`、Xbox `CAMPAIGNSAVE`、Switch `.sjson`。
-- **自动密钥探测**：依次尝试手动密钥 → Unity 设备标识 → 目录名 → `steam_autocloud.vdf` 的 `accountid` → SteamID64 → 父目录数字 ID → Epic 常见回退密钥，并通过真实解密校验。
-- **版本转换**：复制/移动到目标包时自动检测 OC2 / AYCE 版本并转换（处理 `FailedAttempts` 与 `AssistModeEnabled` 差异）。
-- **多标签页**：同时打开多个存档包，每个包一个标签页，互不干扰。
-- **拖拽打开**：将存档目录拖入主窗口即可导入。
-- **复制 / 移动 / 删除**：跨包复制或移动存档时自动按目标平台重命名并迁移备份历史。
-- **JSON 编辑器**：直接查看与编辑存档原始 JSON。
-- **表格编辑器**：以表格形式编辑关卡记录（`Level_*` 条目）。
-- **Meta 编辑器**：编辑 Meta 存档条目。
-- **备份历史时间线**：操作前自动备份，按时间线浏览与恢复历史版本。
-- **同步诊断**：检测“源文件较新、备份待同步”与“同分组档位冲突”，支持同步到源文件、批量备份、冲突处理。
-- **好友号识别**：从 `steam_autocloud.vdf` 提取 `accountid` 作为好友号展示。
-- **星级填充**：读取每个存档的 `ScoreStars` 总数并展示。
-- **日志与全局异常**：按天文件日志，自动清理过期日志；捕获 AppDomain / UI 线程 / Task 未观察异常。
+### 核心特色（Top 5）
+
+1. **多源密钥自动探测**：依次尝试手动密钥 → Unity 设备标识 → 目录名 → `steam_autocloud.vdf` 的 `accountid` → SteamID64 → 父目录数字 ID → Epic 常见回退密钥，并通过真实解密校验。
+2. **OC2 ↔ AYCE 双向版本转换**：复制/移动到目标包时自动检测版本并转换（处理 `FailedAttempts` 与 `AssistModeEnabled` 差异），跨包自动按目标平台重命名。
+3. **操作前自动备份 + 历史时间线**：所有写入型操作执行前自动备份到 `.overcookedtool-backup/`，按时间线浏览与一键恢复历史版本。
+4. **多平台存档自动识别**：OC2 二进制 `.save`、AYCE JSON `.json`、Xbox `CAMPAIGNSAVE`、Switch `.sjson` 全覆盖。
+5. **同步诊断 + 冲突检测**：检测“源文件较新、备份待同步”与“同分组档位冲突”，支持同步到源文件、批量备份、冲突处理；编辑暂存显式同步，避免误覆盖。
+
+### 其他功能
+
+- 多标签页同时打开多个存档包，拖拽打开
+- JSON 编辑器 / 表格编辑器（关卡记录）/ Meta 编辑器
+- 跨包复制 / 移动 / 删除，自动迁移备份历史
+- 好友号识别（从 `steam_autocloud.vdf` 提取 `accountid`）
+- 星级填充（读取 `ScoreStars` 总数并展示）
+- 按天文件日志与全局异常捕获（AppDomain / UI 线程 / Task 未观察异常）
 
 ## 支持的平台与格式
 

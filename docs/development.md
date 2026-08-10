@@ -58,7 +58,7 @@ dotnet test OvercookedTool.sln
 - **SkippableFact**：依赖真实存档样本的用例使用 `SkippableFact`，在样本缺失时自动跳过（不视为失败）。`OvercookedTool.Tests/Helpers/TestSamplePaths.cs` 负责定位可选样本。
 - 测试辅助：`OvercookedTool.Tests/Helpers/ByteArrayExtensions.cs`。
 
-期望结果（参考 `docs/e2e-testing.md` 2026-07-31 执行记录）：约 299 项，279 通过、20 跳过、0 失败。
+期望结果：0 失败（无真实样本时约 175 项，148 通过、27 跳过；本地有 `参考/` 真实样本时用例数会增加，跳过数减少）。
 
 ## 6. 代码格式化
 
