@@ -1,5 +1,6 @@
-﻿param(
-    [string]$Root = "./\overcookedTool\OvercookSavesEditor\存档示例\胡闹厨房全都好吃存档"
+param(
+    # 默认使用脚本所在目录；也可显式传 -Root 指定存档示例根目录
+    [string]$Root = $PSScriptRoot
 )
 
 $fieldSet = New-Object 'System.Collections.Generic.HashSet[string]'

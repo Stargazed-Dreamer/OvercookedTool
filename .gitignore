@@ -34,6 +34,9 @@ temp/
 *.swp
 *~
 
+# ===== Windows 快捷方式（个人便利，不入库） =====
+*.lnk
+
 # ===== OS =====
 Thumbs.db
 ehthumbs.db

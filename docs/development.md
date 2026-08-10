@@ -13,7 +13,7 @@
 ## 2. 克隆与还原
 
 ```powershell
-git clone https://github.com/OvercookedTool/OvercookedTool.git
+git clone https://github.com/Stargazed-Dreamer/OvercookedTool.git
 cd OvercookedTool
 dotnet restore OvercookedTool.sln
 ```

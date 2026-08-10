@@ -26,7 +26,13 @@ public class UserSampleTests
     {
         get
         {
-            if (!TestSamplePaths.IsAvailable(TestSamplePaths.UserOc2SampleDir)) yield break;
+            if (!TestSamplePaths.IsAvailable(TestSamplePaths.UserOc2SampleDir))
+            {
+                // 样本缺失时返回占位数据，让测试方法内的 Skip.IfNot 正确跳过；
+                // 直接 yield break 会让 xUnit 报错 "expected 1 parameter value, but 0 parameter values were provided"
+                yield return new object[] { "__SKIP__" };
+                yield break;
+            }
             foreach (var f in Directory.GetFiles(TestSamplePaths.UserOc2SampleDir, "*.save", SearchOption.TopDirectoryOnly))
             {
                 yield return new object[] { Path.GetFileName(f) };
@@ -248,7 +254,13 @@ public class UserSampleTests
     {
         get
         {
-            if (!TestSamplePaths.IsAvailable(TestSamplePaths.UserAyceSampleDir)) yield break;
+            if (!TestSamplePaths.IsAvailable(TestSamplePaths.UserAyceSampleDir))
+            {
+                // 样本缺失时返回占位数据，让测试方法内的 Skip.IfNot 正确跳过；
+                // 直接 yield break 会让 xUnit 报错 "expected 1 parameter value, but 0 parameter values were provided"
+                yield return new object[] { "__SKIP__" };
+                yield break;
+            }
             foreach (var f in Directory.GetFiles(TestSamplePaths.UserAyceSampleDir, "*.save", SearchOption.TopDirectoryOnly))
             {
                 yield return new object[] { Path.GetFileName(f) };
@@ -457,7 +469,13 @@ public class UserSampleTests
     {
         get
         {
-            if (!TestSamplePaths.IsAvailable(TestSamplePaths.OtherOc2SampleDir)) yield break;
+            if (!TestSamplePaths.IsAvailable(TestSamplePaths.OtherOc2SampleDir))
+            {
+                // 样本缺失时返回占位数据，让测试方法内的 Skip.IfNot 正确跳过；
+                // 直接 yield break 会让 xUnit 报错 "expected 1 parameter value, but 0 parameter values were provided"
+                yield return new object[] { "__SKIP__" };
+                yield break;
+            }
             foreach (var f in Directory.GetFiles(TestSamplePaths.OtherOc2SampleDir, "*.save", SearchOption.TopDirectoryOnly))
             {
                 yield return new object[] { Path.GetFileName(f) };
@@ -573,7 +591,13 @@ public class UserSampleTests
     {
         get
         {
-            if (!TestSamplePaths.IsAvailable(TestSamplePaths.OtherAyceSampleDir)) yield break;
+            if (!TestSamplePaths.IsAvailable(TestSamplePaths.OtherAyceSampleDir))
+            {
+                // 样本缺失时返回占位数据，让测试方法内的 Skip.IfNot 正确跳过；
+                // 直接 yield break 会让 xUnit 报错 "expected 1 parameter value, but 0 parameter values were provided"
+                yield return new object[] { "__SKIP__" };
+                yield break;
+            }
             foreach (var f in Directory.GetFiles(TestSamplePaths.OtherAyceSampleDir, "*.save", SearchOption.TopDirectoryOnly))
             {
                 yield return new object[] { Path.GetFileName(f) };

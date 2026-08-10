@@ -70,7 +70,7 @@
 
 - 文档统一使用中文 Markdown，与本仓库现有文档保持一致。
 - 引用代码时使用相对路径与准确文件名，例如 `OvercookedTool.Core/Services/SavePackageService.cs`。
-- 不要在文档中编造截图链接、徽章 URL 或 Release 下载地址；GitHub 仓库地址写作 `https://github.com/OvercookedTool/OvercookedTool`。
+- 不要在文档中编造截图链接、徽章 URL 或 Release 下载地址；GitHub 仓库地址写作 `https://github.com/Stargazed-Dreamer/OvercookedTool`。
 - 不要创建占位图片；如需配图，请提供真实可访问的资源或用 ASCII/表格替代。
 
 ## 7. 行为准则

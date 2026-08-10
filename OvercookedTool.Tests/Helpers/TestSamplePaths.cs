@@ -20,7 +20,7 @@ internal static class TestSamplePaths
     public static string FixturesDir { get; } = Path.Combine(RepoRoot, "OvercookedTool.Tests", "Fixtures");
 
     /// <summary>
-    /// 仓库内自带的 OC2 真实存档目录（76561198000000002，混合了多个账户的存档）。
+    /// 仓库内自带的 OC2 真实存档目录（虚假 SteamID64 76561198000000002，混合了多个账户的存档）。
     /// 若不存在则测试应跳过。
     /// </summary>
     public static string BuiltInOc2SampleDir { get; } = Path.Combine(RepoRoot, "76561198000000002");

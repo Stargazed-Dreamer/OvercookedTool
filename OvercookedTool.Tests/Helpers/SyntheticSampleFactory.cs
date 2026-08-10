@@ -12,7 +12,7 @@ namespace OvercookedTool.Tests.Helpers;
 internal static class SyntheticSampleFactory
 {
     /// <summary>
-    /// 与历史真实样本一致的 SteamID64 密钥（目录名即密钥），便于复用断言。
+    /// 合成样本使用的虚假 SteamID64 密钥（目录名即密钥），与真实账户无关。
     /// </summary>
     public const string SteamId64Key = "76561198000000002";
 

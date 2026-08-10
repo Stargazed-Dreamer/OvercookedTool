@@ -63,4 +63,4 @@
 - `c7d0141` 更新构建说明
 - `304eeb3` init
 
-[1.0.0]: https://github.com/OvercookedTool/OvercookedTool/releases/tag/v1.0.0
+[1.0.0]: https://github.com/Stargazed-Dreamer/OvercookedTool/releases/tag/v1.0.0
