@@ -2,12 +2,13 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 格式，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)，与 `Directory.Build.props` 中的 `Version` 对齐。
 
-## Unreleased
+## [1.0.1] - 2026-08-12
 
 ### Changed
 
 - LICENSE 版权署名由组织账号 `OvercookedTool` 改为个人 `Stargazed-Dreamer`；README 增加非官方工具与商标免责声明。
 - README 功能特性精简为 Top 5 核心特色 + 其他功能简列表；明确 Windows 专有定位。
+- `Directory.Build.props` 升级版本号到 `1.0.1`，`Authors` 与 `Copyright` 同步改为 `Stargazed-Dreamer`。
 
 ### Removed
 
@@ -76,3 +77,4 @@
 - `8d92d7a` feat: 初始化项目，实现存档管理与 WinForms 界面
 
 [1.0.0]: https://github.com/Stargazed-Dreamer/OvercookedTool/releases/tag/v1.0.0
+[1.0.1]: https://github.com/Stargazed-Dreamer/OvercookedTool/releases/tag/v1.0.1

@@ -4,16 +4,16 @@
   <PropertyGroup>
     <!-- 统一产品信息 -->
     <Product>胡闹厨房存档管理器</Product>
-    <Authors>OvercookedTool</Authors>
-    <Copyright>Copyright © 2026 OvercookedTool</Copyright>
+    <Authors>Stargazed-Dreamer</Authors>
+    <Copyright>Copyright © 2026 Stargazed-Dreamer</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Stargazed-Dreamer/OvercookedTool</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
 
     <!-- 统一版本号（语义化版本） -->
-    <Version>1.0.0</Version>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
 
     <!-- 统一语言与框架特性 -->
     <LangVersion>latest</LangVersion>
