@@ -76,5 +76,5 @@
 - `1bac2cb` chore: 完善构建脚本与开发者说明
 - `8d92d7a` feat: 初始化项目，实现存档管理与 WinForms 界面
 
-[1.0.0]: https://github.com/Stargazed-Dreamer/OvercookedTool/releases/tag/v1.0.0
+[1.0.0]: https://github.com/Stargazed-Dreamer/OvercookedTool/commit/008900f
 [1.0.1]: https://github.com/Stargazed-Dreamer/OvercookedTool/releases/tag/v1.0.1

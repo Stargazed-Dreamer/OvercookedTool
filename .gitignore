@@ -34,6 +34,12 @@ temp/
 *.swp
 *~
 
+# ===== AI 协作工具配置（本地保留，不入库）=====
+.trae/
+.agent/
+.claude/
+.cursor/
+
 # ===== Windows 快捷方式（个人便利，不入库） =====
 *.lnk
 
