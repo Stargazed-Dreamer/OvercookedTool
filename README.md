@@ -6,12 +6,15 @@
 
 > 本项目由原 Python + C# 混合实现（PySide6 UI + `OvercookedLib.dll` + pythonnet）迁移为纯 C# .NET 9 解决方案，迁移历史见 [`迁移说明.md`](./迁移说明.md)。
 
+<img width="1663" height="1105" alt="overcooked" src="https://github.com/user-attachments/assets/703d841d-4714-4fa0-94d3-c5cee47c4de6" />
+
 ## 功能特性
 
 ### 核心特色（Top 5）
 
 1. **多源密钥自动探测**：依次尝试手动密钥 → Unity 设备标识 → 目录名 → `steam_autocloud.vdf` 的 `accountid` → SteamID64 → 父目录数字 ID → Epic 常见回退密钥，并通过真实解密校验。
-2. **OC2 ↔ AYCE 双向版本转换**：复制/移动到目标包时自动检测版本并转换（处理 `FailedAttempts` 与 `AssistModeEnabled` 差异），跨包自动按目标平台重命名。
+2. **OC2 ↔ AYCE 双向版本转换**：复制/移动到目标包时
+自动检测版本并转换（处理 `FailedAttempts` 与 `AssistModeEnabled` 差异），跨包自动按目标平台重命名。
 3. **操作前自动备份 + 历史时间线**：所有写入型操作执行前自动备份到 `.overcookedtool-backup/`，按时间线浏览与一键恢复历史版本。
 4. **多平台存档自动识别**：OC2 二进制 `.save`、AYCE JSON `.json`、Xbox `CAMPAIGNSAVE`、Switch `.sjson` 全覆盖。
 5. **同步诊断 + 冲突检测**：检测“源文件较新、备份待同步”与“同分组档位冲突”，支持同步到源文件、批量备份、冲突处理；编辑暂存显式同步，避免误覆盖。
