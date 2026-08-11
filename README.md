@@ -80,11 +80,7 @@ OvercookedTool.App\bin\Debug\net9.0-windows\OvercookedTool.App.exe
 ├─ #build-debug.bat                    # Debug 构建脚本
 ├─ #build-release.bat                  # Release 构建脚本
 ├─ #create-package.bat                 # 打包脚本（产出 OvercookedSaveTool-Package/）
-├─ docs/
-│  ├─ architecture.md                  # 架构设计
-│  ├─ development.md                   # 开发指南
-│  ├─ usage.md                         # 用户使用手册
-│  └─ e2e-testing.md                   # 端到端测试指南
+├─ docs/                               # 文档
 ├─ OvercookedTool.Core/                # 核心类库（net9.0）
 │  ├─ Crypto/OvercookedCrypto.cs       # AES-CBC + CRC32 加解密
 │  ├─ Services/
@@ -138,4 +134,8 @@ OvercookedTool.App\bin\Debug\net9.0-windows\OvercookedTool.App.exe
 
 本项目基于 [MIT License](./LICENSE) 开源，版权所有 © 2026 Stargazed-Dreamer。
 
-> **非官方工具声明**：本项目是独立开发的第三方存档管理工具，不隶属于 Ghost Town Games 或 Team17。Overcooked 是 Ghost Town Games / Team17 的商标，本项目名称仅用于指代游戏本身，不主张商标权利。使用本工具请遵守当地法律，对存档的修改风险自负。
+> **非官方工具声明**：Overcooked 是 Ghost Town Games / Team17 的商标，本项目名称仅用于指代游戏本身，不主张商标权利。使用本工具请遵守当地法律，对存档的修改风险自负。
+
+## 致谢
+这个[工具](https://github.com/hadeutscher/OvercookedTool)给了我极大的帮助，整个项目几乎是建立在其之上的！
+我们内置的这个[工具](https://github.com/LinnielDW/UnityDeviceUniqueIdentifierHarness)，是原样提供的，它很好用！
