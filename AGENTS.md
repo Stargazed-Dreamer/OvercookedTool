@@ -67,6 +67,7 @@
 - ✅ `OvercookedTool.App/about_content.json` — `github_url` 已统一为 `https://github.com/Stargazed-Dreamer/OvercookedTool`
 - ✅ `OvercookedTool.App/OvercookedTool.App.csproj.user` — 已 `git rm --cached` 取消跟踪
 - ✅ `release - 快捷方式.lnk`、`obfuscar - 快捷方式.lnk` — 已删除，`.gitignore` 已加 `*.lnk` 规则
+- ✅ `OvercookedTool.App/libcoffee.dll`（收款码）、`coffee.png`、`#配置混淆.bat`（Obfuscar 入口） — 已 `git rm --cached` 取消跟踪（磁盘保留），`.gitignore` 已加排除规则，git 历史已清理
 - ✅ 测试代码中所有个人 SteamID64 — 已替换为虚假值 `76561198000000001` / `76561198000000002`
 - ✅ git 历史中残留的真实存档目录（以真实 SteamID64 命名）与 `obj/` — 已用 `git filter-repo` 清理（含 `--replace-text` 清理字符串残留）
 - ✅ git 历史中所有 commit message — 已重写为规范格式（`feat/fix/docs/chore/test/style` 前缀）

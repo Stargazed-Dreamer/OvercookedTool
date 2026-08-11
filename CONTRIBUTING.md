@@ -7,7 +7,6 @@
 - 操作系统：Windows（WinForms 桌面应用仅支持 Windows）。
 - SDK：[.NET 9 SDK](https://dotnet.microsoft.com/zh-cn/download/dotnet/9.0)。
 - IDE（任选其一）：Visual Studio 2022、VS Code（安装 C# Dev Kit）或 JetBrains Rider。
-- 可选：[Obfuscar](https://github.com/obfuscar/obfuscar)，仅用于发布版混淆。
 - 克隆仓库后执行 `dotnet restore OvercookedTool.sln` 还原依赖。
 
 ## 2. 代码风格

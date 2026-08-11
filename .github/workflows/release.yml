@@ -52,7 +52,10 @@ jobs:
           Copy-Item "$release/OvercookedTool.App.exe" $pkg
           Copy-Item "$release/OvercookedTool.App.dll" $pkg
           Copy-Item "$release/OvercookedTool.Core.dll" $pkg
-          Copy-Item "$release/libcoffee.dll" $pkg
+          # 收款码（libcoffee.dll）不入库，本地存在才复制
+          if (Test-Path "$release/libcoffee.dll") {
+            Copy-Item "$release/libcoffee.dll" $pkg
+          }
           # 配置文件
           Copy-Item "$release/save_display_config.json" $pkg
           # 运行时配置

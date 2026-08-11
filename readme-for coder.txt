@@ -1,10 +1,6 @@
 关于界面：
 about_content.json
 
-收款码：
-图片文件直接改后缀：
-libcoffee.dll
-
 翻译：
 save_display_config.json
 

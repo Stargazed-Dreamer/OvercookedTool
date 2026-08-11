@@ -38,16 +38,8 @@
 
 ## 环境要求
 
-### 最终用户
-
 - Windows 操作系统（WinForms 桌面应用）。
 - .NET 9 运行时（建议安装 [.NET Desktop Runtime 9.x](https://dotnet.microsoft.com/zh-cn/download/dotnet/9.0)）；从 Release 包直接运行也可，包内已包含所需依赖。
-
-### 开发者
-
-- Windows + [.NET 9 SDK](https://dotnet.microsoft.com/zh-cn/download/dotnet/9.0)。
-- 可选 IDE：Visual Studio 2022、VS Code（C# Dev Kit）或 JetBrains Rider。
-- 可选 [Obfuscar](https://github.com/obfuscar/obfuscar) 用于发布版混淆。
 
 ## 快速开始
 
@@ -88,7 +80,6 @@ OvercookedTool.App\bin\Debug\net9.0-windows\OvercookedTool.App.exe
 ├─ #build-debug.bat                    # Debug 构建脚本
 ├─ #build-release.bat                  # Release 构建脚本
 ├─ #create-package.bat                 # 打包脚本（产出 OvercookedSaveTool-Package/）
-├─ #配置混淆.bat                        # Obfuscar 混淆配置脚本
 ├─ docs/
 │  ├─ architecture.md                  # 架构设计
 │  ├─ development.md                   # 开发指南
@@ -116,7 +107,6 @@ OvercookedTool.App\bin\Debug\net9.0-windows\OvercookedTool.App.exe
 │  ├─ about_content.json               # 关于页内容
 │  ├─ save_display_config.json         # 关卡翻译/显示配置
 │  ├─ appsettings.json                 # 应用配置
-│  ├─ libcoffee.dll                    # 收款码（改后缀存储）
 │  └─ tools.scan_translation_keys.ps1  # 扫描未翻译键脚本
 └─ OvercookedTool.Tests/               # xUnit 测试（net9.0）
    ├─ Crypto/                          # 加解密单元测试
@@ -125,22 +115,12 @@ OvercookedTool.App\bin\Debug\net9.0-windows\OvercookedTool.App.exe
    └─ Helpers/                         # 测试辅助
 ```
 
-## 构建与打包
-
-构建与打包使用仓库根目录的批处理脚本：
-
-1. `#build-release.bat`：以 Release 配置构建解决方案，输出到 `OvercookedTool.App/bin/Release/`。
-2. `#create-package.bat`：将构建产物与依赖整理到 `OvercookedSaveTool-Package/` 目录，作为可分发的发行包。
-3. `#配置混淆.bat`：使用 Obfuscar 对 Release 产物进行混淆（可选）。
-
-构建产物默认位于 `OvercookedTool.App\bin\` 下。详见 [docs/development.md](./docs/development.md) 的“打包发布”一节。
-
 ## 文档导航
 
 | 文档 | 说明 |
 |---|---|
 | [docs/architecture.md](./docs/architecture.md) | 整体架构、模块职责、关键流程、加密细节、数据结构 |
-| [docs/development.md](./docs/development.md) | 开发环境、构建、测试、格式化、打包、混淆、调试 |
+| [docs/development.md](./docs/development.md) | 开发环境、构建、测试、格式化、打包、调试 |
 | [docs/usage.md](./docs/usage.md) | 面向最终用户的使用手册 |
 | [docs/e2e-testing.md](./docs/e2e-testing.md) | 端到端测试指南（LocalAgent Computer Use） |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | 贡献指南、代码风格、提交规范、测试要求 |
@@ -156,4 +136,6 @@ OvercookedTool.App\bin\Debug\net9.0-windows\OvercookedTool.App.exe
 
 ## 开源协议
 
-本项目基于 [MIT License](./LICENSE) 开源，版权所有 © 2026 OvercookedTool。
+本项目基于 [MIT License](./LICENSE) 开源，版权所有 © 2026 Stargazed-Dreamer。
+
+> **非官方工具声明**：本项目是独立开发的第三方存档管理工具，不隶属于 Ghost Town Games 或 Team17。Overcooked 是 Ghost Town Games / Team17 的商标，本项目名称仅用于指代游戏本身，不主张商标权利。使用本工具请遵守当地法律，对存档的修改风险自负。

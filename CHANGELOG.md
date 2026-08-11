@@ -2,6 +2,18 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 格式，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)，与 `Directory.Build.props` 中的 `Version` 对齐。
 
+## Unreleased
+
+### Changed
+
+- LICENSE 版权署名由组织账号 `OvercookedTool` 改为个人 `Stargazed-Dreamer`；README 增加非官方工具与商标免责声明。
+- README 功能特性精简为 Top 5 核心特色 + 其他功能简列表；明确 Windows 专有定位。
+
+### Removed
+
+- 移除 Obfuscar 代码混淆流程及相关文件（`#配置混淆.bat`），清理文档中的混淆章节。
+- `libcoffee.dll`（收款码）、`coffee.png` 不再随仓库分发（本地保留，`.gitignore` 已排除），打包脚本改为存在才复制。
+
 ## [1.0.0] - 2026-08-07
 
 首个对齐到 `Directory.Build.props` 版本号 `1.0.0` 的可发布版本。本项目由原 Python + C# 混合实现（旧仓库 `OvercookSavesEditor`，UI 使用 PySide6，加解密依赖 `OvercookedLib.dll` + pythonnet）迁移为纯 C# .NET 9 解决方案，详见 `迁移说明.md`。
@@ -23,7 +35,7 @@
   - 多标签页主界面、导入存档包、拖拽打开、自动检测候选路径、手动密钥输入、JSON 编辑器、表格编辑器、Meta 编辑器、存档卡片矩阵、调整档位、新建存档、历史时间线、同步诊断、设置、关于、捐赠等窗体。
   - 首次启动 Unity 设备标识 Harness（`UnityHarness/_UnityDeviceUniqueIdentifierHarness.exe`）采集本机 `SystemInfo.deviceUniqueIdentifier`。
   - `AppSettings.cs` 设置项：最近路径、自动检测、日志开关、最近历史条数、备份数、日志保留天数、Unity 设备标识。
-  - 资源文件：`about_content.json`（关于页内容）、`save_display_config.json`（关卡翻译/显示配置）、`tools.scan_translation_keys.ps1`（扫描未翻译键）、`libcoffee.dll`（收款码改后缀存储）。
+  - 资源文件：`about_content.json`（关于页内容）、`save_display_config.json`（关卡翻译/显示配置）、`tools.scan_translation_keys.ps1`（扫描未翻译键）。
 - 测试套件（`OvercookedTool.Tests`，xUnit）：单元测试覆盖加密、密钥检测、文件名解析、版本转换；集成测试使用合成 fixtures，确保 CI 可运行；真实存档测试用 `SkippableFact` 在缺样本时自动跳过。
 - 端到端测试指南 `docs/e2e-testing.md`（基于 LocalAgent Computer Use 的 WinForms 真实路径验证）。
 - 文档套件：`README.md`、`CONTRIBUTING.md`、`docs/architecture.md`、`docs/development.md`、`docs/usage.md`。
@@ -40,9 +52,9 @@
 ### Fixed
 
 - 修复 `OvercookedTool.App.csproj` 文件头连续 4 个 UTF-8 BOM 导致构建失败的问题（2026-07-31 E2E 执行期间发现并修复，`dotnet test` 299 项：279 通过、20 跳过、0 失败；`dotnet build` 0 警告 0 错误）。
-- 修复 Unity 机器码模块无法独立使用的问题，将其融合进项目作为 Harness（提交 `无法独立使用unity机器码模块，融合进项目`）。
-- 修复群友报错场景（经核查为使用方问题，提交 `群友报错检查，是群友的问题`）。
-- 恢复 App 构建并补全端到端测试文档（提交 `fix:restore-app-build-and-document-e2e-tests`）。
+- 修复 Unity 机器码模块无法独立使用的问题，将其融合进项目作为 Harness（提交 `feat: 集成 Unity 设备标识采集工具`）。
+- 修复密钥探测与存档识别问题（提交 `fix: 修复密钥探测与存档识别问题`）。
+- 恢复 App 构建并补全端到端测试文档（提交 `fix: 恢复 App 构建并完善 e2e 测试文档`）。
 
 ### Removed
 
@@ -54,13 +66,13 @@
 
 以下提交对应本项目从旧 Python 实现迁移到纯 C# 的过程，按时间倒序：
 
-- `f1ed009` 创建测试
-- `dd5af4e` fix:restore-app-build-and-document-e2e-tests
-- `fda7987` 群友报错检查，是群友的问题
-- `ccc25f9` AI加注释，可能有问题
-- `996756e` 无法独立使用unity机器码模块，融合进项目
-- `323a4c7` 可发布
-- `c7d0141` 更新构建说明
-- `304eeb3` init
+- `729f20d` test: 添加单元测试与集成测试
+- `bbadb88` fix: 恢复 App 构建并完善 e2e 测试文档
+- `c7b3022` fix: 修复密钥探测与存档识别问题
+- `e727b26` docs: 为代码添加注释
+- `3632eac` feat: 集成 Unity 设备标识采集工具
+- `a5f389a` chore: 调整发布脚本与资源文件
+- `1bac2cb` chore: 完善构建脚本与开发者说明
+- `8d92d7a` feat: 初始化项目，实现存档管理与 WinForms 界面
 
 [1.0.0]: https://github.com/Stargazed-Dreamer/OvercookedTool/releases/tag/v1.0.0

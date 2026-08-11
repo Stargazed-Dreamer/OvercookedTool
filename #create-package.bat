@@ -1,4 +1,4 @@
-﻿@echo off
+@echo off
 REM ============================================================
 REM 胡闹厨房存档管理器 - 打包发布脚本
 REM 作用：把 Release 产物整理为可分发的 OvercookedSaveTool-Package 目录
@@ -46,7 +46,8 @@ REM 主程序与托管程序集
 copy "%RELEASE_DIR%\OvercookedTool.App.exe" "%PACKAGE_DIR%\" >nul
 copy "%RELEASE_DIR%\OvercookedTool.App.dll" "%PACKAGE_DIR%\" >nul
 copy "%RELEASE_DIR%\OvercookedTool.Core.dll" "%PACKAGE_DIR%\" >nul
-copy "%RELEASE_DIR%\libcoffee.dll" "%PACKAGE_DIR%\" >nul
+REM 收款码（libcoffee.dll）不入库，本地存在才复制
+if exist "%RELEASE_DIR%\libcoffee.dll" copy "%RELEASE_DIR%\libcoffee.dll" "%PACKAGE_DIR%\" >nul
 
 REM 配置文件
 copy "%RELEASE_DIR%\save_display_config.json" "%PACKAGE_DIR%\" >nul

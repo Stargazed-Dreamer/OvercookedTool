@@ -37,6 +37,11 @@ temp/
 # ===== Windows 快捷方式（个人便利，不入库） =====
 *.lnk
 
+# ===== 个人收款码与混淆脚本（本地保留，不入库） =====
+libcoffee.dll
+coffee.png
+#配置混淆.bat
+
 # ===== OS =====
 Thumbs.db
 ehthumbs.db
